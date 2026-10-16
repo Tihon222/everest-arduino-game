@@ -33,3 +33,31 @@
   margin-top: 20px;
   font-size: 14px;
 }
+
+/* ═══ МОБИЛЬНАЯ ВЕРСИЯ (≤ 768px) ═══ */
+@media (max-width: 768px) {
+  .auth-card {
+    padding: 25px 20px;
+    width: 92%;
+    max-width: 360px;
+  }
+
+  .auth-card h2 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+
+  .auth-card input {
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .auth-submit {
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .auth-footer {
+    font-size: 13px;
+  }
+}

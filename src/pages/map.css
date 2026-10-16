@@ -219,3 +219,64 @@
   gap: 20px;
   padding: 15px 30px;
 }
+
+/* ═══ МОБИЛЬНАЯ ВЕРСИЯ (≤ 768px) ═══ */
+@media (max-width: 768px) {
+  .map-topbar {
+    padding: 10px 15px;
+  }
+
+  .round-label { font-size: 10px; }
+  .round-number { font-size: 20px; }
+  .players-count { font-size: 11px; }
+
+  .rating-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
+  /* Уменьшаем узлы */
+  .node-box {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+    border-width: 1.5px;
+    border-radius: 6px;
+  }
+
+  .node-title {
+    font-size: 9px;
+    margin-top: 3px;
+    max-width: 60px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.1;
+  }
+
+  /* Игрок меньше */
+  .player-icon {
+    font-size: 18px;
+  }
+
+  .player-label {
+    font-size: 8px;
+  }
+
+  /* Фейковые игроки — прячем на телефоне */
+  .fake-player {
+    display: none;
+  }
+
+  /* Рейтинг на всю ширину */
+  .rating-panel {
+    top: 60px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-height: 60vh;
+    padding: 15px;
+  }
+
+  .rating-panel h2 { font-size: 13px; }
+  .rating-panel li { font-size: 11px; }
+}

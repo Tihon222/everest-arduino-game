@@ -163,3 +163,102 @@
   background: #21262d;
   color: #6e7681;
 }
+
+/* ═══ МОБИЛЬНАЯ ВЕРСИЯ (≤ 768px) ═══ */
+@media (max-width: 768px) {
+  .lesson-container {
+    padding: 6px;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .lesson-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 15px;
+    margin-bottom: 6px;
+  }
+
+  .lesson-header h1 {
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  .level-reference {
+    font-size: 10px;
+  }
+
+  .timer {
+    font-size: 14px;
+    padding: 5px 10px;
+    margin: 0;
+    align-self: flex-start;
+  }
+
+  .exit-btn {
+    font-size: 12px;
+    align-self: flex-end;
+  }
+
+  /* Основной блок — колонка */
+  .lesson-body {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .task-panel {
+    width: 100%;
+    order: -1; /* задание сверху */
+  }
+
+  .code-editor-panel {
+    width: 100%;
+  }
+
+  .panel-header {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .task-content {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .task-content p {
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .code-area {
+    min-height: 160px;
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .run-btn {
+    margin: 6px;
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+
+  /* Монитор */
+  .serial-monitor {
+    height: 130px;
+  }
+
+  .monitor-output {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+
+  /* Кнопка «Завершить» */
+  .complete-btn {
+    width: calc(100% - 12px);
+    margin: 6px;
+    font-size: 14px;
+    padding: 10px;
+  }
+}

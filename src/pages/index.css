@@ -148,3 +148,72 @@
   border-radius: 6px;
   cursor: pointer;
 }
+
+/* ═══ МОБИЛЬНАЯ ВЕРСИЯ (≤ 768px) ═══ */
+@media (max-width: 768px) {
+  .home-container {
+    padding: 15px;
+  }
+
+  /* Кнопки входа — компактнее */
+  .auth-links {
+    top: 10px;
+    right: 10px;
+    gap: 6px;
+  }
+
+  .auth-btn {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  .main-content {
+    padding: 15px;
+  }
+
+  .main-content h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+
+  .description {
+    font-size: 0.95rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .description p {
+    margin-bottom: 0.7rem;
+  }
+
+  .start-btn {
+    font-size: 1rem;
+    padding: 12px 28px;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  /* Модалка */
+  .modal-content {
+    padding: 20px;
+    width: 95%;
+  }
+
+  .modal-content h2 {
+    font-size: 1.2rem;
+  }
+
+  .modal-content p {
+    font-size: 0.9rem;
+  }
+
+  .code-block {
+    font-size: 11px;
+    padding: 10px;
+  }
+
+  .continue-btn {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
