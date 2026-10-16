@@ -55,7 +55,6 @@
 }
 
 .code-area {
-  flex: 1;
   background: #0d1117;
   color: #c9d1d9;
   border: none;
@@ -168,15 +167,18 @@
 @media (max-width: 768px) {
   .lesson-container {
     padding: 6px;
-    height: 100vh;
+    height: auto;
+    min-height: 100vh;
+    overflow-x: hidden;
     overflow-y: auto;
   }
 
+  /* Шапка — компактнее */
   .lesson-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
-    padding: 10px 15px;
+    gap: 4px;
+    padding: 10px 12px;
     margin-bottom: 6px;
   }
 
@@ -185,80 +187,83 @@
     line-height: 1.3;
   }
 
-  .level-reference {
-    font-size: 10px;
-  }
-
-  .timer {
-    font-size: 14px;
-    padding: 5px 10px;
-    margin: 0;
-    align-self: flex-start;
-  }
-
   .exit-btn {
-    font-size: 12px;
     align-self: flex-end;
+    font-size: 12px;
   }
 
-  /* Основной блок — колонка */
+  /* Основной блок — колонка, задание сверху */
   .lesson-body {
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 6px;
+    margin-bottom: 6px;
   }
 
   .task-panel {
     width: 100%;
-    order: -1; /* задание сверху */
+    order: -1;
+    max-height: 140px;
+    overflow-y: auto;
   }
 
   .code-editor-panel {
     width: 100%;
+    max-height: 260px;
   }
 
   .panel-header {
-    padding: 6px 10px;
-    font-size: 12px;
+    font-size: 11px;
+    padding: 5px 10px;
   }
 
   .task-content {
-    padding: 10px;
+    padding: 8px 10px;
     font-size: 13px;
-  }
-
-  .task-content p {
-    margin: 0;
     line-height: 1.4;
   }
 
+  /* Редактор — ОГРАНИЧЕННАЯ высота, чтобы не растягивался */
   .code-area {
-    min-height: 160px;
+    min-height: 140px;
+    max-height: 180px;
     font-size: 12px;
-    padding: 10px;
+    padding: 8px;
+    resize: none;
   }
 
   .run-btn {
     margin: 6px;
-    font-size: 13px;
     padding: 8px 14px;
+    font-size: 13px;
+    width: calc(100% - 12px);
   }
 
-  /* Монитор */
+  /* Монитор — компактнее */
   .serial-monitor {
-    height: 130px;
+    height: auto;
+    max-height: 160px;
+    margin-bottom: 6px;
   }
 
   .monitor-output {
     font-size: 11px;
-    padding: 8px 10px;
+    padding: 8px;
+    max-height: 120px;
+    overflow-y: auto;
   }
 
-  /* Кнопка «Завершить» */
+  /* Бейдж ПРОЙДЕНО/ОШИБКА — нормальный размер */
+  .status-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  /* Кнопка завершения — всегда внизу, большой тап-таргет */
   .complete-btn {
     width: calc(100% - 12px);
-    margin: 6px;
-    font-size: 14px;
-    padding: 10px;
+    margin: 0 6px 20px;
+    padding: 12px;
+    font-size: 15px;
+    min-height: 48px;
   }
 }
