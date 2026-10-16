@@ -1,0 +1,150 @@
+/* src/pages/index.css */
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative; /* ВАЖНО: чтобы кнопки absolute позиционировались от него */
+  overflow: hidden;
+  background-image: url('/images/everest-day.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Оверлей */
+.home-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 17, 23, 0.75);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Все прямые дети поверх оверлея */
+.home-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Кнопки входа — правый верхний угол */
+.auth-links {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  gap: 15px;
+}
+
+.auth-btn {
+  font-size: 14px;
+  padding: 8px 16px;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  background: rgba(22, 27, 34, 0.9);
+  color: #c9d1d9;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.auth-btn:hover {
+  background: #1f6feb;
+  border-color: #1f6feb;
+}
+
+/* Центральный блок */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.main-content h1 {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  color: #58a6ff;
+  text-shadow: 0 2px 20px rgba(88, 166, 255, 0.5);
+}
+
+.description {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #c9d1d9;
+}
+
+.description p {
+  margin-bottom: 1rem;
+}
+
+.description strong {
+  color: #d4b106;
+}
+
+.start-btn {
+  background-color: #238636;
+  color: white;
+  font-size: 1.2rem;
+  padding: 15px 40px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.start-btn:hover {
+  background-color: #2ea043;
+  box-shadow: 0 0 20px rgba(46, 160, 67, 0.5);
+}
+
+/* Модалка */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal-content {
+  background: #161b22;
+  padding: 40px;
+  border-radius: 12px;
+  border: 1px solid #30363d;
+  max-width: 600px;
+  width: 90%;
+  text-align: left;
+  position: relative;
+  z-index: 101;
+}
+
+.code-block {
+  background: #0d1117;
+  padding: 15px;
+  border-radius: 6px;
+  font-family: monospace;
+  color: #79c0ff;
+  margin: 15px 0;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.continue-btn {
+  width: 100%;
+  margin-top: 20px;
+  background-color: #1f6feb;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}

@@ -1,0 +1,221 @@
+/* src/pages/map.css */
+.map-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-image: url('/images/everest-sunset.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+
+/* Лёгкий оверлей — не слишком тёмный, чтобы гора читалась */
+.map-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 25, 41, 0.55) 0%,
+    rgba(13, 17, 23, 0.75) 100%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Линии и узлы поверх оверлея */
+.map-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Узлы */
+.level-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s;
+  z-index: 3;
+}
+
+.level-node:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.node-box {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #30363d;
+  border-radius: 8px;
+  background: rgba(22, 27, 34, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #8b949e;
+  font-weight: bold;
+  font-size: 18px;
+  backdrop-filter: blur(4px);
+}
+
+.level-node.passed .node-box {
+  border-color: #d4b106;
+  background: rgba(61, 51, 0, 0.95);
+  color: #d4b106;
+  box-shadow: 0 0 12px rgba(212, 177, 6, 0.6);
+}
+
+.level-node.current .node-box {
+  box-shadow: 0 0 25px #58a6ff, 0 0 50px rgba(88, 166, 255, 0.4);
+  transform: scale(1.1);
+}
+
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 20px #58a6ff; }
+  50% { box-shadow: 0 0 35px #58a6ff; }
+}
+
+.node-title {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #c9d1d9;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+
+.level-node:not(.passed):not(.current) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Игрок */
+.player-icon {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 26px;
+  color: #58a6ff;
+  z-index: 5;
+  filter: drop-shadow(0 0 10px #58a6ff);
+  pointer-events: none;
+}
+
+/* Верхняя панель */
+.map-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  z-index: 10;
+  background: linear-gradient(180deg, rgba(10, 25, 41, 0.9) 0%, transparent 100%);
+}
+
+.round-info {
+  display: flex;
+  flex-direction: column;
+  color: #d4b106;
+  font-family: monospace;
+}
+
+.round-label { font-size: 12px; opacity: 0.7; }
+.round-number { font-size: 28px; font-weight: bold; }
+.players-count { color: #c9d1d9; font-size: 14px; }
+
+.rating-btn {
+  background: rgba(13, 17, 23, 0.9);
+  color: #d4b106;
+  border: 1px solid #d4b106;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.rating-btn:hover {
+  background: #d4b106;
+  color: #0d1117;
+}
+
+/* Фейковые игроки */
+.fake-player {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  opacity: 0.65;
+  z-index: 2;
+  pointer-events: none;
+  filter: grayscale(0.5);
+  transition: opacity 0.3s;
+}
+
+/* Рейтинг */
+.rating-panel {
+  position: absolute;
+  top: 80px;
+  right: 30px;
+  width: 320px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: rgba(13, 17, 23, 0.97);
+  border: 1px solid #d4b106;
+  border-radius: 8px;
+  padding: 20px;
+  z-index: 20;
+  color: #c9d1d9;
+}
+
+.rating-panel h2 {
+  color: #d4b106;
+  font-size: 16px;
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+}
+
+.rating-panel ol { list-style: none; padding: 0; }
+
+.rating-panel li {
+  display: grid;
+  grid-template-columns: 30px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #21262d;
+  font-size: 13px;
+}
+
+.rating-avatar { font-size: 16px; }
+.rating-name { font-weight: bold; }
+.rating-level { color: #8b949e; font-size: 11px; }
+.rating-score { color: #d4b106; font-family: monospace; }
+.fake-player {
+  font-size: 16px;
+  opacity: 0.45;
+}
+
+.players-count {
+  margin-left: auto;
+  margin-right: 20px;
+  color: #c9d1d9;
+  font-size: 14px;
+  font-family: monospace;
+}
+.map-topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 15px 30px;
+}

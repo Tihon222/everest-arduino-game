@@ -1,0 +1,165 @@
+.lesson-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+.lesson-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: #161b22;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.lesson-header h1 {
+  font-size: 1.5rem;
+  color: #58a6ff;
+}
+
+.exit-btn {
+  color: #f85149;
+  font-weight: bold;
+}
+
+.lesson-body {
+  display: flex;
+  flex: 1;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.code-editor-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+}
+
+.task-panel {
+  width: 350px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+}
+
+.panel-header {
+   display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-area {
+  flex: 1;
+  background: #0d1117;
+  color: #c9d1d9;
+  border: none;
+  padding: 15px;
+  font-family: monospace;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+}
+
+.run-btn {
+  margin: 10px;
+  background: #238636;
+  border: none;
+}
+
+.task-content {
+  padding: 15px;
+}
+
+.task-content ul {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.serial-monitor {
+    display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.monitor-output {
+  padding: 15px;
+  font-family: monospace;
+  color: #7ee787;
+  overflow-y: auto;
+  flex: 1;
+  margin: 0;
+}
+
+.complete-btn {
+  background-color: #d4b106;
+  color: #0d1117;
+  font-weight: bold;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+.complete-btn:hover {
+  background-color: #e5c100;
+}
+
+.monitor-output {
+  padding: 15px;
+  font-family: monospace;
+  color: #7ee787;
+  overflow-y: auto;
+  flex: 1;
+  margin: 0;
+  white-space: pre-wrap;
+}
+.level-reference {
+  font-size: 12px;
+  color: #8b949e;
+  font-style: italic;
+  margin-top: 4px;
+} 
+
+/* Кнопка «Запустить код» в успешном состоянии */
+.run-btn.success {
+  background: #238636;
+  border-color: #2ea043;
+}
+
+/* Индикатор статуса в шапке монитора */
+.status-badge {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.status-badge.success {
+  background: #238636;
+  color: white;
+}
+
+.status-badge.failed {
+  background: #f85149;
+  color: white;
+}
+
+/* Цвет вывода монитора в зависимости от статуса */
+.monitor-output.idle { color: #8b949e; }
+.monitor-output.passed { color: #7ee787; }
+.monitor-output.failed { color: #ff7b72; }
+
+/* Кнопка «Завершить» */
+.complete-btn:disabled {
+  background: #21262d;
+  color: #6e7681;
+}
