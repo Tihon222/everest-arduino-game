@@ -132,7 +132,7 @@ const MapPage = () => {
     };
   }, [isFallingAnim, user]);
 
-  // Обратный отсчёт отдыха (с автообновлением)
+  // Обратный отсчёт отдыха — ЖЕСТКАЯ разблокировка при 0
   useEffect(() => {
     if (!myProgress?.rest_until) {
       setRestLeft(0);
@@ -147,10 +147,21 @@ const MapPage = () => {
 
       if (left <= 0) {
         clearInterval(interval);
+
+        // 1. Мгновенно снимаем блокировку в интерфейсе
+        setRestLeft(0);
+        setMyProgress((prev: any) =>
+          prev ? { ...prev, rest_until: null, is_falling: false } : prev
+        );
+
+        // 2. В фоне синхронизируем с базой
         if (user) {
-          await endRest(user.id).catch(e => console.error('endRest error:', e));
-          // Автоматически обновляем данные без перезагрузки страницы
-          await reloadProgress();
+          try {
+            await endRest(user.id);
+            await reloadProgress();
+          } catch (e) {
+            console.error('endRest error:', e);
+          }
         }
       }
     }, 200);
@@ -228,7 +239,7 @@ const MapPage = () => {
         </button>
       </div>
 
-      {/* Таймер отдыха под рейтингом — виден всегда, когда идёт отдых */}
+      {/* Таймер отдыха — виден всегда, пока идёт отдых */}
       {restLeft > 0 && (
         <div className="rest-timer-display">
           <span className="rest-timer-label">Отдых</span>
