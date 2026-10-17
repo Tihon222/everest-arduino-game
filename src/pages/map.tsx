@@ -88,7 +88,7 @@ const MapPage = () => {
       const path = buildPath(fromLvl, toLvl, true);
       let segment = 0;
       let t = 0;
-      const speed = 0.03; // медленнее, чем обычный переход
+      const speed = 0.005; // медленнее, чем обычный переход
 
       const animate = () => {
         const a = path[segment];

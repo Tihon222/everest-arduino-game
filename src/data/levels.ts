@@ -56,7 +56,7 @@ export const LEVELS: Level[] = [
 
   // ═══ ПОЛКА 2: 11–15 — влево ═══
   { id: 11, title: 'Обрыв 1', x: 74, y: 78, type: 'fix',
-    timeLimit: 90, fallbackLevel: 10,
+    timeLimit: 20, fallbackLevel: 10,
     task: '⚠ НАЙДИ ОШИБКУ ЗА 90 СЕКУНД!\n\nПропущена точка с запятой после Serial.begin(9600).',
     buggyCode: 'void setup() {\n  Serial.begin(9600)\n}',
     checks: [{ pattern: /Serial\s*\.\s*begin\s*\(\s*9600\s*\)\s*;/, message: 'Пропущена ; после Serial.begin(9600)' }] },
