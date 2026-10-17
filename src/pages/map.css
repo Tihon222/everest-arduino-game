@@ -349,3 +349,51 @@
   .rest-text strong { font-size: 11px; }
   .rest-text span { font-size: 16px; }
 }
+
+/* Таймер отдыха под рейтингом (справа сверху) */
+.rest-timer-display {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  background: rgba(139, 0, 0, 0.95);
+  border: 1px solid #ff4d4d;
+  border-radius: 8px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  z-index: 100;
+  box-shadow: 0 0 15px rgba(255, 77, 77, 0.6);
+  animation: pulse-rest 1.5s infinite;
+}
+
+.rest-timer-label {
+  font-size: 11px;
+  color: #ffcccc;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rest-timer-value {
+  font-size: 22px;
+  font-weight: bold;
+  font-family: monospace;
+  color: #ff4d4d;
+  line-height: 1;
+}
+
+.rest-timer-unit {
+  font-size: 11px;
+  color: #ffcccc;
+}
+
+@media (max-width: 768px) {
+  .rest-timer-display {
+    top: 60px;
+    right: 10px;
+    padding: 6px 10px;
+  }
+  .rest-timer-value { font-size: 18px; }
+  .rest-timer-label { font-size: 9px; }
+  .rest-timer-unit { font-size: 9px; }
+}

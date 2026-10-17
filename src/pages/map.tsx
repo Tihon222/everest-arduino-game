@@ -33,6 +33,20 @@ const MapPage = () => {
   const prevLevelRef = useRef(currentLevel);
   const animationRef = useRef<number | null>(null);
 
+  // Функция перезагрузки данных из базы
+  const reloadProgress = async () => {
+    try {
+      const players = await getLeaderboard();
+      setRealPlayers(players);
+      if (user) {
+        const me = players.find((p: any) => p.id === user.id);
+        setMyProgress(me || null);
+      }
+    } catch (e) {
+      console.error('Ошибка перезагрузки:', e);
+    }
+  };
+
   // Загрузка прогресса из localStorage
   useEffect(() => {
     const saved = localStorage.getItem('everest_progress');
@@ -57,7 +71,6 @@ const MapPage = () => {
           const me = players.find((p: any) => p.id === user.id);
           setMyProgress(me || null);
 
-          // Если упал, но отдых не начат — запускаем анимацию спуска
           if (me?.is_falling && !me?.rest_until) {
             setIsFallingAnim(true);
             const fromLvl = LEVELS.find(l => l.id === 11);
@@ -83,12 +96,11 @@ const MapPage = () => {
     const toLvl = LEVELS.find(l => l.id === 10);
     if (!fromLvl || !toLvl) return;
 
-    // Небольшая пауза перед спуском
     const delay = setTimeout(() => {
       const path = buildPath(fromLvl, toLvl, true);
       let segment = 0;
       let t = 0;
-      const speed = 0.005; // медленнее, чем обычный переход
+      const speed = 0.03;
 
       const animate = () => {
         const a = path[segment];
@@ -120,7 +132,7 @@ const MapPage = () => {
     };
   }, [isFallingAnim, user]);
 
-  // Обратный отсчёт отдыха
+  // Обратный отсчёт отдыха (с автообновлением)
   useEffect(() => {
     if (!myProgress?.rest_until) {
       setRestLeft(0);
@@ -129,25 +141,26 @@ const MapPage = () => {
 
     const until = new Date(myProgress.rest_until).getTime();
 
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       const left = Math.max(0, Math.ceil((until - Date.now()) / 1000));
       setRestLeft(left);
 
       if (left <= 0) {
         clearInterval(interval);
         if (user) {
-          endRest(user.id).catch(e => console.error('endRest error:', e));
+          await endRest(user.id).catch(e => console.error('endRest error:', e));
+          // Автоматически обновляем данные без перезагрузки страницы
+          await reloadProgress();
         }
-        setMyProgress({ ...myProgress, rest_until: null, is_falling: false });
       }
     }, 200);
 
     return () => clearInterval(interval);
   }, [myProgress, user]);
 
-  // Обычная анимация перехода между уровнями
+  // Обычная анимация перехода
   useEffect(() => {
-    if (isFallingAnim) return; // при падении не мешаем
+    if (isFallingAnim) return;
     const prevLvl = LEVELS.find((l) => l.id === prevLevelRef.current) || LEVELS[0];
     const currLvl = LEVELS.find((l) => l.id === currentLevel) || LEVELS[0];
 
@@ -215,6 +228,16 @@ const MapPage = () => {
         </button>
       </div>
 
+      {/* Таймер отдыха под рейтингом — виден всегда, когда идёт отдых */}
+      {restLeft > 0 && (
+        <div className="rest-timer-display">
+          <span className="rest-timer-label">Отдых</span>
+          <span className="rest-timer-value">{restLeft}</span>
+          <span className="rest-timer-unit">сек</span>
+        </div>
+      )}
+
+      {/* Плашка по центру (для акцента) */}
       {restLeft > 0 && (
         <div className="rest-banner">
           <div className="rest-icon">💤</div>
