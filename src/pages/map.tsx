@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LEVELS } from '../data/levels';
 import { useAuth } from '../context/AuthContext';
-import { getLeaderboard, endRest } from '../services/progress';
+import { getLeaderboard, endRest, startRest } from '../services/progress';
 import './map.css';
 
 function buildPath(
@@ -28,10 +28,12 @@ const MapPage = () => {
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
   const [restLeft, setRestLeft] = useState(0);
   const [myProgress, setMyProgress] = useState<any>(null);
+  const [isFallingAnim, setIsFallingAnim] = useState(false);
 
   const prevLevelRef = useRef(currentLevel);
   const animationRef = useRef<number | null>(null);
 
+  // Загрузка прогресса из localStorage
   useEffect(() => {
     const saved = localStorage.getItem('everest_progress');
     if (saved) {
@@ -45,6 +47,7 @@ const MapPage = () => {
     }
   }, []);
 
+  // Загрузка рейтинга
   useEffect(() => {
     const load = async () => {
       try {
@@ -53,6 +56,15 @@ const MapPage = () => {
         if (user) {
           const me = players.find((p: any) => p.id === user.id);
           setMyProgress(me || null);
+
+          // Если упал, но отдых не начат — запускаем анимацию спуска
+          if (me?.is_falling && !me?.rest_until) {
+            setIsFallingAnim(true);
+            const fromLvl = LEVELS.find(l => l.id === 11);
+            if (fromLvl) {
+              setPlayerPos({ x: fromLvl.x, y: fromLvl.y });
+            }
+          }
         }
       } catch (e) {
         console.error('Ошибка загрузки рейтинга:', e);
@@ -63,6 +75,52 @@ const MapPage = () => {
     load();
   }, [user]);
 
+  // Анимация падения: съезд с 11 на 10, потом отдых
+  useEffect(() => {
+    if (!isFallingAnim) return;
+
+    const fromLvl = LEVELS.find(l => l.id === 11);
+    const toLvl = LEVELS.find(l => l.id === 10);
+    if (!fromLvl || !toLvl) return;
+
+    // Небольшая пауза перед спуском
+    const delay = setTimeout(() => {
+      const path = buildPath(fromLvl, toLvl, true);
+      let segment = 0;
+      let t = 0;
+      const speed = 0.03; // медленнее, чем обычный переход
+
+      const animate = () => {
+        const a = path[segment];
+        const b = path[segment + 1];
+        if (!a || !b) {
+          setIsFallingAnim(false);
+          if (user) {
+            startRest(user.id, 10).catch(e => console.error('startRest error:', e));
+          }
+          return;
+        }
+
+        t += speed;
+        if (t >= 1) {
+          t = 0;
+          segment += 1;
+        }
+        const x = a.x + (b.x - a.x) * t;
+        const y = a.y + (b.y - a.y) * t;
+        setPlayerPos({ x, y });
+        animationRef.current = requestAnimationFrame(animate);
+      };
+      animationRef.current = requestAnimationFrame(animate);
+    }, 500);
+
+    return () => {
+      clearTimeout(delay);
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
+  }, [isFallingAnim, user]);
+
+  // Обратный отсчёт отдыха
   useEffect(() => {
     if (!myProgress?.rest_until) {
       setRestLeft(0);
@@ -87,7 +145,9 @@ const MapPage = () => {
     return () => clearInterval(interval);
   }, [myProgress, user]);
 
+  // Обычная анимация перехода между уровнями
   useEffect(() => {
+    if (isFallingAnim) return; // при падении не мешаем
     const prevLvl = LEVELS.find((l) => l.id === prevLevelRef.current) || LEVELS[0];
     const currLvl = LEVELS.find((l) => l.id === currentLevel) || LEVELS[0];
 
@@ -130,7 +190,7 @@ const MapPage = () => {
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [currentLevel]);
+  }, [currentLevel, isFallingAnim]);
 
   const handleClick = (levelId: number) => {
     if (restLeft > 0 && levelId === 11) {

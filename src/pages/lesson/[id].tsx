@@ -6,7 +6,7 @@ import { THEORY } from '../../data/theory';
 import TheoryModal from '../../components/TheoryModal';
 import FallingScreen from '../../components/FallingScreen';
 import { useAuth } from '../../context/AuthContext';
-import { getProgress, saveProgress, addScore, startRest } from '../../services/progress';
+import { getProgress, saveProgress, addScore } from '../../services/progress';
 import './lesson.css';
 
 const LessonPage = () => {
@@ -31,7 +31,6 @@ const LessonPage = () => {
       setOutput('Готов к запуску...');
       setStatus('idle');
       setAttempts(0);
-      setIsFalling(false);
     }
   }, [levelId]);
 
@@ -39,7 +38,9 @@ const LessonPage = () => {
     if (!level || !THEORY[levelId]) return;
     if (level.type === 'fix') return;
     const seen = localStorage.getItem(`theory_seen_${levelId}`);
-    if (!seen) setShowTheory(true);
+    if (!seen) {
+      setShowTheory(true);
+    }
   }, [level, levelId]);
 
   const closeTheory = () => {
@@ -49,27 +50,32 @@ const LessonPage = () => {
 
   useEffect(() => {
     if (!level || level.type !== 'fix' || !level.timeLimit) return;
+
     setTimeLeft(level.timeLimit);
+
     timerRef.current = window.setInterval(() => {
       setTimeLeft((prev) => {
         if (prev === null) return prev;
         if (prev <= 1) {
           const fallback = level.fallbackLevel || 1;
           localStorage.setItem('everest_progress', String(fallback));
-          localStorage.setItem('falling_from', String(levelId));
           setIsFalling(true);
+
           if (user) {
-            startRest(user.id, 10).catch((e) => console.error('startRest error:', e));
+            saveProgress(user.id, { is_falling: true, level: fallback })
+              .catch(e => console.error('saveProgress error:', e));
           }
+
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
+
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [level, navigate, user, levelId]);
+  }, [level, navigate, user]);
 
   if (!level) {
     return (
@@ -96,7 +102,7 @@ const LessonPage = () => {
 
     const textMatches = code.match(/Serial\.println\s*\(\s*["']([^"']+)["']\s*\)/g);
     if (textMatches) {
-      textMatches.forEach((match) => {
+      textMatches.forEach(match => {
         const text = match.match(/["']([^"']+)["']/)?.[1];
         if (text) { log += `> ${text}\n`; hasOutput = true; }
       });
@@ -104,12 +110,15 @@ const LessonPage = () => {
 
     const varMatches = code.match(/Serial\.println\s*\(\s*(\w+)\s*\)/g);
     if (varMatches) {
-      varMatches.forEach((match) => {
+      varMatches.forEach(match => {
         const varName = match.match(/\(\s*(\w+)\s*\)/)?.[1];
         if (varName && varName !== 'digitalRead' && varName !== 'analogRead') {
           const varValueMatch = code.match(new RegExp(`${varName}\\s*=\\s*(\\d+)`));
-          if (varValueMatch) log += `> ${varValueMatch[1]}\n`;
-          else log += `> [значение ${varName}]\n`;
+          if (varValueMatch) {
+            log += `> ${varValueMatch[1]}\n`;
+          } else {
+            log += `> [значение ${varName}]\n`;
+          }
           hasOutput = true;
         }
       });
@@ -125,28 +134,39 @@ const LessonPage = () => {
       hasOutput = true;
     }
 
-    if (!hasOutput) log += '> (Код выполнен, но ничего не выведено)\n';
+    if (!hasOutput) {
+      log += '> (Код выполнен, но ничего не выведено)\n';
+    }
+
     return log;
   };
 
   const runCode = () => {
     setAttempts((prev) => prev + 1);
+
     if (!code.trim()) {
       setOutput('⚠ ОШИБКА: код не обнаружен.\nНапиши решение в редакторе и нажми «Запустить код».');
       setStatus('failed');
       return;
     }
+
     const result = checkCode();
     if (!result.ok) {
       setOutput('❌ ПРОВЕРКА НЕ ПРОЙДЕНА\n\n' + result.errors.join('\n') + '\n\nИсправь ошибки и попробуй снова.');
       setStatus('failed');
       return;
     }
+
+    const lines = code.split('\n').length;
+    const chars = code.length;
     const simLog = simulateOutput();
+
     setOutput(
       `✅ КОМПИЛЯЦИЯ УСПЕШНА\n` +
-      `Строк: ${code.split('\n').length} | Символов: ${code.length}\n\n` +
-      `Serial Monitor:\n` + simLog + `\nСтатус: ✅ ПРОЙДЕНО`
+      `Строк: ${lines} | Символов: ${chars}\n\n` +
+      `Serial Monitor:\n` +
+      simLog +
+      `\nСтатус: ✅ ПРОЙДЕНО`
     );
     setStatus('passed');
   };
@@ -159,7 +179,9 @@ const LessonPage = () => {
 
     const nextLevel = levelId + 1;
     const currentProgress = parseInt(localStorage.getItem('everest_progress') || '1');
-    if (nextLevel > currentProgress) localStorage.setItem('everest_progress', String(nextLevel));
+    if (nextLevel > currentProgress) {
+      localStorage.setItem('everest_progress', String(nextLevel));
+    }
 
     if (user) {
       try {
@@ -169,6 +191,7 @@ const LessonPage = () => {
           ...prevAttempts,
           [levelId]: (prevAttempts[levelId] || 0) + attempts,
         };
+
         const penalty = Math.max(0, (attempts - 1) * 10);
         const points = Math.max(0, 100 - penalty);
 
@@ -178,6 +201,7 @@ const LessonPage = () => {
           rest_until: null,
           is_falling: false,
         });
+
         await addScore(user.id, points);
       } catch (e) {
         console.error('Ошибка сохранения прогресса:', e);
@@ -192,15 +216,26 @@ const LessonPage = () => {
     <div className="lesson-container">
       <header className="lesson-header">
         <div>
-          <h1>Уровень {id}: {level.title}{level.type === 'fix' && ' ⚠ ОБРЫВ'}</h1>
-          {level.reference && <div className="level-reference">{level.reference}</div>}
+          <h1>
+            Уровень {id}: {level.title}
+            {level.type === 'fix' && ' ⚠ ОБРЫВ'}
+          </h1>
+          {level.reference && (
+            <div className="level-reference">{level.reference}</div>
+          )}
         </div>
+
         {timeLeft !== null && (
-          <div className={`timer ${timeLeft < 15 ? 'danger' : ''}`}>⏱ {timeLeft} сек</div>
+          <div className={`timer ${timeLeft < 15 ? 'danger' : ''}`}>
+            ⏱ {timeLeft} сек
+          </div>
         )}
+
         <div className="header-actions">
           {THEORY[levelId] && level.type !== 'fix' && (
-            <button className="theory-btn" onClick={() => setShowTheory(true)}>📘 Теория</button>
+            <button className="theory-btn" onClick={() => setShowTheory(true)}>
+              📘 Теория
+            </button>
           )}
           <Link to="/map" className="exit-btn">Выйти на карту</Link>
         </div>
@@ -210,13 +245,26 @@ const LessonPage = () => {
         <div className="code-editor-panel">
           <div className="panel-header">
             Редактор кода
-            {attempts > 0 && <span style={{ fontSize: 11, color: '#8b949e', fontWeight: 'normal' }}> · попыток: {attempts}</span>}
+            {attempts > 0 && (
+              <span style={{ fontSize: 11, color: '#8b949e', fontWeight: 'normal' }}>
+                {' '}· попыток: {attempts}
+              </span>
+            )}
           </div>
-          <textarea value={code} onChange={(e) => setCode(e.target.value)} className="code-area" spellCheck={false} />
-          <button onClick={runCode} className={`run-btn ${status === 'passed' ? 'success' : ''}`}>
+          <textarea
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            className="code-area"
+            spellCheck={false}
+          />
+          <button
+            onClick={runCode}
+            className={`run-btn ${status === 'passed' ? 'success' : ''}`}
+          >
             {status === 'passed' ? '✅ Код верен' : 'Запустить код'}
           </button>
         </div>
+
         <div className="task-panel">
           <div className="panel-header">Задание</div>
           <div className="task-content">
@@ -234,12 +282,24 @@ const LessonPage = () => {
         <pre className={`monitor-output ${status}`}>{output}</pre>
       </div>
 
-      <button onClick={completeLevel} className="complete-btn" disabled={status !== 'passed'} style={{ opacity: status !== 'passed' ? 0.4 : 1, cursor: status !== 'passed' ? 'not-allowed' : 'pointer' }}>
+      <button
+        onClick={completeLevel}
+        className="complete-btn"
+        disabled={status !== 'passed'}
+        style={{
+          opacity: status !== 'passed' ? 0.4 : 1,
+          cursor: status !== 'passed' ? 'not-allowed' : 'pointer',
+        }}
+      >
         {status !== 'passed' ? 'Сначала запусти код' : 'Завершить уровень →'}
       </button>
 
       {showTheory && THEORY[levelId] && (
-        <TheoryModal title={THEORY[levelId].title} content={THEORY[levelId].content} onClose={closeTheory} />
+        <TheoryModal
+          title={THEORY[levelId].title}
+          content={THEORY[levelId].content}
+          onClose={closeTheory}
+        />
       )}
 
       {isFalling && (
