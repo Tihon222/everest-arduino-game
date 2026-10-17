@@ -108,7 +108,10 @@ const MapPage = () => {
         if (!a || !b) {
           setIsFallingAnim(false);
           if (user) {
-            startRest(user.id, 10).catch(e => console.error('startRest error:', e));
+            // ВАЖНО: после startRest обновляем myProgress, чтобы появился таймер
+            startRest(user.id, 10)
+              .then(() => reloadProgress())
+              .catch(e => console.error('startRest error:', e));
           }
           return;
         }
