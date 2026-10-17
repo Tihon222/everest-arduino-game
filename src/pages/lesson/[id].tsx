@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { LEVELS } from '../../data/levels';
+import { THEORY } from '../../data/theory';
+import TheoryModal from '../../components/TheoryModal';
 import './lesson.css';
 
 const LessonPage = () => {
@@ -14,6 +16,7 @@ const LessonPage = () => {
   const [output, setOutput] = useState('Готов к запуску...');
   const [status, setStatus] = useState<'idle' | 'passed' | 'failed'>('idle');
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [showTheory, setShowTheory] = useState(false);
   const timerRef = useRef<number | null>(null);
 
   // Сброс кода при смене уровня
@@ -24,6 +27,20 @@ const LessonPage = () => {
       setStatus('idle');
     }
   }, [levelId]);
+
+  // Показ теории при первом заходе на уровень
+  useEffect(() => {
+    if (!level || !THEORY[levelId]) return;
+    const seen = localStorage.getItem(`theory_seen_${levelId}`);
+    if (!seen) {
+      setShowTheory(true);
+    }
+  }, [level, levelId]);
+
+  const closeTheory = () => {
+    setShowTheory(false);
+    localStorage.setItem(`theory_seen_${levelId}`, 'true');
+  };
 
   // Таймер для fix-заданий
   useEffect(() => {
@@ -74,7 +91,6 @@ const LessonPage = () => {
     let log = '> Программа запущена...\n';
     let hasOutput = false;
 
-    // 1. Имитация вывода текста: Serial.println("Привет");
     const textMatches = code.match(/Serial\.println\s*\(\s*["']([^"']+)["']\s*\)/g);
     if (textMatches) {
       textMatches.forEach(match => {
@@ -86,13 +102,11 @@ const LessonPage = () => {
       });
     }
 
-    // 2. Имитация вывода переменной: int x = 10; Serial.println(x);
     const varMatches = code.match(/Serial\.println\s*\(\s*(\w+)\s*\)/g);
     if (varMatches) {
       varMatches.forEach(match => {
         const varName = match.match(/\(\s*(\w+)\s*\)/)?.[1];
         if (varName && varName !== 'digitalRead' && varName !== 'analogRead') {
-          // Ищем значение этой переменной в коде (например, int x = 10;)
           const varValueMatch = code.match(new RegExp(`${varName}\\s*=\\s*(\\d+)`));
           if (varValueMatch) {
             log += `> ${varValueMatch[1]}\n`;
@@ -104,15 +118,13 @@ const LessonPage = () => {
       });
     }
 
-    // 3. Имитация простого цикла for (если есть for и Serial.println)
     if (code.includes('for') && (code.includes('Serial.println') || code.includes('Serial.print'))) {
-      log += '> 0\n> 1\n> 2\n> 3\n> 4\n'; // Выводим как пример
+      log += '> 0\n> 1\n> 2\n> 3\n> 4\n';
       hasOutput = true;
     }
 
-    // 4. Имитация вывода в analogRead (для уровней с потенциометром)
     if (code.includes('analogRead') && code.includes('Serial.println')) {
-      log += '> 512\n'; // Примерное среднее значение
+      log += '> 512\n';
       hasOutput = true;
     }
 
@@ -187,7 +199,17 @@ const LessonPage = () => {
           </div>
         )}
 
-        <Link to="/map" className="exit-btn">Выйти на карту</Link>
+        <div className="header-actions">
+          {THEORY[levelId] && (
+            <button
+              className="theory-btn"
+              onClick={() => setShowTheory(true)}
+            >
+              📘 Теория
+            </button>
+          )}
+          <Link to="/map" className="exit-btn">Выйти на карту</Link>
+        </div>
       </header>
 
       <div className="lesson-body">
@@ -235,6 +257,15 @@ const LessonPage = () => {
       >
         {status !== 'passed' ? 'Сначала запусти код' : 'Завершить уровень →'}
       </button>
+
+      {/* Модалка теории */}
+      {showTheory && THEORY[levelId] && (
+        <TheoryModal
+          title={THEORY[levelId].title}
+          content={THEORY[levelId].content}
+          onClose={closeTheory}
+        />
+      )}
     </div>
   );
 };
