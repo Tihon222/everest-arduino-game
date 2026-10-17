@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react()],
-  // На GitHub Pages используем base, локально — нет
-  base: process.env.NODE_ENV === 'production' ? '/everest-arduino-game/' : '/',
-})
+  // При build (npm run build) — подпапка GitHub Pages
+  // При dev (npm run dev) — корень
+  base: command === 'build' ? '/everest-arduino-game/' : '/',
+}))
