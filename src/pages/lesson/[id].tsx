@@ -69,39 +69,85 @@ const LessonPage = () => {
     return { ok: errors.length === 0, errors };
   };
 
+  // Умная имитация Serial Monitor
+  const simulateOutput = () => {
+    let log = '> Программа запущена...\n';
+    let hasOutput = false;
+
+    // 1. Имитация вывода текста: Serial.println("Привет");
+    const textMatches = code.match(/Serial\.println\s*\(\s*["']([^"']+)["']\s*\)/g);
+    if (textMatches) {
+      textMatches.forEach(match => {
+        const text = match.match(/["']([^"']+)["']/)?.[1];
+        if (text) {
+          log += `> ${text}\n`;
+          hasOutput = true;
+        }
+      });
+    }
+
+    // 2. Имитация вывода переменной: int x = 10; Serial.println(x);
+    const varMatches = code.match(/Serial\.println\s*\(\s*(\w+)\s*\)/g);
+    if (varMatches) {
+      varMatches.forEach(match => {
+        const varName = match.match(/\(\s*(\w+)\s*\)/)?.[1];
+        if (varName && varName !== 'digitalRead' && varName !== 'analogRead') {
+          // Ищем значение этой переменной в коде (например, int x = 10;)
+          const varValueMatch = code.match(new RegExp(`${varName}\\s*=\\s*(\\d+)`));
+          if (varValueMatch) {
+            log += `> ${varValueMatch[1]}\n`;
+          } else {
+            log += `> [значение ${varName}]\n`;
+          }
+          hasOutput = true;
+        }
+      });
+    }
+
+    // 3. Имитация простого цикла for (если есть for и Serial.println)
+    if (code.includes('for') && (code.includes('Serial.println') || code.includes('Serial.print'))) {
+      log += '> 0\n> 1\n> 2\n> 3\n> 4\n'; // Выводим как пример
+      hasOutput = true;
+    }
+
+    // 4. Имитация вывода в analogRead (для уровней с потенциометром)
+    if (code.includes('analogRead') && code.includes('Serial.println')) {
+      log += '> 512\n'; // Примерное среднее значение
+      hasOutput = true;
+    }
+
+    if (!hasOutput) {
+      log += '> (Код выполнен, но ничего не выведено)\n';
+    }
+
+    return log;
+  };
+
   // Кнопка «Запустить код»
   const runCode = () => {
-    // 1. Пусто?
     if (!code.trim()) {
-      setOutput('⚠ ОШИБКА: код не обнаружен.\nНапиши решение в редакторе слева и нажми «Запустить код».');
+      setOutput('⚠ ОШИБКА: код не обнаружен.\nНапиши решение в редакторе и нажми «Запустить код».');
       setStatus('failed');
       return;
     }
 
-    // 2. Проверка правил
     const result = checkCode();
-
     if (!result.ok) {
-      setOutput(
-        '❌ ПРОВЕРКА НЕ ПРОЙДЕНА\n\n' +
-        result.errors.join('\n') +
-        '\n\nИсправь ошибки и попробуй снова.'
-      );
+      setOutput('❌ ПРОВЕРКА НЕ ПРОЙДЕНА\n\n' + result.errors.join('\n') + '\n\nИсправь ошибки и попробуй снова.');
       setStatus('failed');
       return;
     }
 
-    // 3. Всё ок — эмулируем работу «компилятора»
     const lines = code.split('\n').length;
     const chars = code.length;
+    const simLog = simulateOutput();
 
     setOutput(
       `✅ КОМПИЛЯЦИЯ УСПЕШНА\n` +
       `Строк: ${lines} | Символов: ${chars}\n\n` +
       `Serial Monitor:\n` +
-      `> Программа запущена...\n` +
-      `> Все условия уровня выполнены.\n\n` +
-      `Статус: ✅ ПРОЙДЕНО`
+      simLog +
+      `\nСтатус: ✅ ПРОЙДЕНО`
     );
     setStatus('passed');
   };
@@ -129,8 +175,6 @@ const LessonPage = () => {
           <h1>
             Уровень {id}: {level.title}
             {level.type === 'fix' && ' ⚠ ОБРЫВ'}
-            {level.type === 'design' && ' 🎨 САПР'}
-            {level.type === 'diagnostic' && ' 🔧 ДИАГНОСТИКА'}
           </h1>
           {level.reference && (
             <div className="level-reference">{level.reference}</div>
@@ -174,8 +218,8 @@ const LessonPage = () => {
       <div className="serial-monitor">
         <div className="panel-header">
           Serial Monitor
-          {status === 'passed' && <span className="status-badge success">PROIDENO</span>}
-          {status === 'failed' && <span className="status-badge failed">OSHIBKA</span>}
+          {status === 'passed' && <span className="status-badge success">ПРОЙДЕНО</span>}
+          {status === 'failed' && <span className="status-badge failed">ОШИБКА</span>}
         </div>
         <pre className={`monitor-output ${status}`}>{output}</pre>
       </div>
