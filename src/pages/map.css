@@ -280,3 +280,72 @@
   .rating-panel h2 { font-size: 13px; }
   .rating-panel li { font-size: 11px; }
 }
+
+/* Плашка отдыха */
+.rest-banner {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(139, 0, 0, 0.92);
+  border: 1px solid #ff4d4d;
+  border-radius: 12px;
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  z-index: 100;
+  box-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
+  animation: pulse-rest 2s infinite;
+}
+
+.rest-icon { font-size: 32px; }
+
+.rest-text {
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+}
+
+.rest-text strong {
+  font-size: 13px;
+  color: #ffcccc;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rest-text span {
+  font-size: 20px;
+  font-weight: bold;
+  font-family: monospace;
+  color: #ff4d4d;
+}
+
+@keyframes pulse-rest {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 77, 77, 0.5); }
+  50% { box-shadow: 0 0 40px rgba(255, 77, 77, 0.8); }
+}
+
+.level-node.rest-blocked .node-box {
+  border-color: #8b0000;
+  background: #1a0000;
+  color: #8b0000;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.player-icon.falling {
+  animation: falling-pulse 0.8s infinite;
+}
+
+@keyframes falling-pulse {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px #ff4d4d); color: #ff4d4d; }
+  50% { opacity: 0.3; filter: drop-shadow(0 0 20px #ff0000); color: #ff0000; }
+}
+
+@media (max-width: 768px) {
+  .rest-banner { top: 70px; padding: 10px 15px; gap: 10px; }
+  .rest-icon { font-size: 24px; }
+  .rest-text strong { font-size: 11px; }
+  .rest-text span { font-size: 16px; }
+}

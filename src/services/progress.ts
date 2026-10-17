@@ -7,49 +7,71 @@ export interface UserProgress {
   level: number;
   total_score: number;
   attempts: Record<number, number>;
-  updated_at: string;
+  rest_until?: string | null;
+  is_falling?: boolean;
 }
 
-// Получить прогресс текущего пользователя
 export const getProgress = async (uid: string): Promise<UserProgress | null> => {
-  const { data, error } = await supabase.from('users').select('*').eq('id', uid).single();
-  if (error) {
-    if (error.code === 'PGRST116') return null; // нет записи
-    console.error('getProgress error:', error);
-    return null;
-  }
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', uid)
+    .single();
+  if (error) return null;
   return data as UserProgress;
 };
 
-// Сохранить / обновить прогресс
 export const saveProgress = async (uid: string, data: Partial<UserProgress>) => {
   const { error } = await supabase
     .from('users')
-    .upsert({
-      id: uid,
-      ...data,
-      updated_at: new Date().toISOString(),
-    });
+    .update({ ...data, updated_at: new Date().toISOString() })
+    .eq('id', uid);
   if (error) console.error('saveProgress error:', error);
 };
 
-// Прибавить баллы
 export const addScore = async (uid: string, points: number) => {
-  const existing = await getProgress(uid);
-  const newScore = (existing?.total_score || 0) + points;
-  await saveProgress(uid, { total_score: newScore });
+  const { data } = await supabase
+    .from('users')
+    .select('total_score')
+    .eq('id', uid)
+    .single();
+  const current = data?.total_score || 0;
+  await supabase
+    .from('users')
+    .update({ total_score: current + points, updated_at: new Date().toISOString() })
+    .eq('id', uid);
 };
 
-// Получить топ игроков
-export const getLeaderboard = async (): Promise<UserProgress[]> => {
+export const getLeaderboard = async () => {
   const { data, error } = await supabase
     .from('users')
     .select('*')
     .order('total_score', { ascending: false })
     .limit(15);
-  if (error) {
-    console.error('getLeaderboard error:', error);
-    return [];
-  }
-  return data as UserProgress[];
+  if (error) return [];
+  return data || [];
+};
+
+export const startRest = async (uid: string, seconds: number = 10) => {
+  const restUntil = new Date(Date.now() + seconds * 1000).toISOString();
+  await supabase
+    .from('users')
+    .update({
+      rest_until: restUntil,
+      is_falling: true,
+      level: 10,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', uid);
+};
+
+export const endRest = async (uid: string) => {
+  await supabase
+    .from('users')
+    .update({
+      rest_until: null,
+      is_falling: false,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', uid);
 };
