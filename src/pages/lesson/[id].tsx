@@ -4,6 +4,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { LEVELS } from '../../data/levels';
 import { THEORY } from '../../data/theory';
 import TheoryModal from '../../components/TheoryModal';
+import { useAuth } from '../../context/AuthContext';
+import { getProgress, saveProgress, addScore } from '../../services/progress';
 import './lesson.css';
 
 const LessonPage = () => {
@@ -11,20 +13,23 @@ const LessonPage = () => {
   const navigate = useNavigate();
   const levelId = parseInt(id || '1');
   const level = LEVELS.find((l) => l.id === levelId);
+  const { user } = useAuth();
 
   const [code, setCode] = useState(level?.buggyCode || level?.starterCode || '');
   const [output, setOutput] = useState('Готов к запуску...');
   const [status, setStatus] = useState<'idle' | 'passed' | 'failed'>('idle');
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showTheory, setShowTheory] = useState(false);
+  const [attempts, setAttempts] = useState(0);
   const timerRef = useRef<number | null>(null);
 
-  // Сброс кода при смене уровня
+  // Сброс при смене уровня
   useEffect(() => {
     if (level) {
       setCode(level.buggyCode || level.starterCode || '');
       setOutput('Готов к запуску...');
       setStatus('idle');
+      setAttempts(0);
     }
   }, [levelId]);
 
@@ -75,7 +80,7 @@ const LessonPage = () => {
     );
   }
 
-  // Проверка кода против правил уровня
+  // Проверка кода
   const checkCode = (): { ok: boolean; errors: string[] } => {
     const errors: string[] = [];
     for (const rule of level.checks) {
@@ -86,7 +91,7 @@ const LessonPage = () => {
     return { ok: errors.length === 0, errors };
   };
 
-  // Умная имитация Serial Monitor
+  // Имитация Serial Monitor
   const simulateOutput = () => {
     let log = '> Программа запущена...\n';
     let hasOutput = false;
@@ -95,10 +100,7 @@ const LessonPage = () => {
     if (textMatches) {
       textMatches.forEach(match => {
         const text = match.match(/["']([^"']+)["']/)?.[1];
-        if (text) {
-          log += `> ${text}\n`;
-          hasOutput = true;
-        }
+        if (text) { log += `> ${text}\n`; hasOutput = true; }
       });
     }
 
@@ -135,8 +137,10 @@ const LessonPage = () => {
     return log;
   };
 
-  // Кнопка «Запустить код»
+  // Запустить код
   const runCode = () => {
+    setAttempts((prev) => prev + 1);
+
     if (!code.trim()) {
       setOutput('⚠ ОШИБКА: код не обнаружен.\nНапиши решение в редакторе и нажми «Запустить код».');
       setStatus('failed');
@@ -164,8 +168,8 @@ const LessonPage = () => {
     setStatus('passed');
   };
 
-  // Кнопка «Завершить уровень»
-  const completeLevel = () => {
+  // Завершить уровень + сохранить прогресс в Firestore
+  const completeLevel = async () => {
     if (status !== 'passed') {
       setOutput('⚠ Сначала запусти код и убедись, что он проходит проверку.');
       return;
@@ -176,6 +180,30 @@ const LessonPage = () => {
     if (nextLevel > currentProgress) {
       localStorage.setItem('everest_progress', String(nextLevel));
     }
+
+    if (user) {
+      try {
+        const existing = await getProgress(user.uid);
+        const prevAttempts = existing?.attempts || {};
+        const newAttempts = {
+          ...prevAttempts,
+          [levelId]: (prevAttempts[levelId] || 0) + attempts,
+        };
+
+        const penalty = Math.max(0, (attempts - 1) * 10);
+        const points = Math.max(0, 100 - penalty);
+
+        await saveProgress(user.uid, {
+          level: Math.max(nextLevel, existing?.level || 1),
+          attempts: newAttempts,
+        });
+
+        await addScore(user.uid, points);
+      } catch (e) {
+        console.error('Ошибка сохранения прогресса:', e);
+      }
+    }
+
     if (timerRef.current) clearInterval(timerRef.current);
     navigate('/map');
   };
@@ -201,10 +229,7 @@ const LessonPage = () => {
 
         <div className="header-actions">
           {THEORY[levelId] && (
-            <button
-              className="theory-btn"
-              onClick={() => setShowTheory(true)}
-            >
+            <button className="theory-btn" onClick={() => setShowTheory(true)}>
               📘 Теория
             </button>
           )}
@@ -214,7 +239,14 @@ const LessonPage = () => {
 
       <div className="lesson-body">
         <div className="code-editor-panel">
-          <div className="panel-header">Редактор кода</div>
+          <div className="panel-header">
+            Редактор кода
+            {attempts > 0 && (
+              <span style={{ fontSize: 11, color: '#8b949e', fontWeight: 'normal' }}>
+                {' '}· попыток: {attempts}
+              </span>
+            )}
+          </div>
           <textarea
             value={code}
             onChange={(e) => setCode(e.target.value)}
@@ -258,7 +290,6 @@ const LessonPage = () => {
         {status !== 'passed' ? 'Сначала запусти код' : 'Завершить уровень →'}
       </button>
 
-      {/* Модалка теории */}
       {showTheory && THEORY[levelId] && (
         <TheoryModal
           title={THEORY[levelId].title}
