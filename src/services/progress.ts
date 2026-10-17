@@ -1,56 +1,55 @@
 // src/services/progress.ts
-import { doc, setDoc, getDoc, updateDoc, increment, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../supabase';
 
 export interface UserProgress {
-  level: number;         // текущий уровень
-  totalScore: number;    // общий балл
-  attempts: Record<number, number>; // попытки на каждом уровне: { 1: 2, 5: 1 }
-  completedAt: Record<number, number>; // время на fix-уровнях (сек)
-  updatedAt?: number;
+  id: string;
+  email: string;
+  level: number;
+  total_score: number;
+  attempts: Record<number, number>;
+  updated_at: string;
 }
 
 // Получить прогресс текущего пользователя
 export const getProgress = async (uid: string): Promise<UserProgress | null> => {
-  const snap = await getDoc(doc(db, 'users', uid));
-  if (!snap.exists()) return null;
-  return snap.data() as UserProgress;
-};
-
-// Сохранить/обновить прогресс
-export const saveProgress = async (uid: string, data: Partial<UserProgress>) => {
-  const userRef = doc(db, 'users', uid);
-  const snap = await getDoc(userRef);
-
-  if (snap.exists()) {
-    await updateDoc(userRef, { ...data, updatedAt: Date.now() });
-  } else {
-    await setDoc(userRef, {
-      level: 1,
-      totalScore: 0,
-      attempts: {},
-      completedAt: {},
-      updatedAt: Date.now(),
-      ...data,
-    });
+  const { data, error } = await supabase.from('users').select('*').eq('id', uid).single();
+  if (error) {
+    if (error.code === 'PGRST116') return null; // нет записи
+    console.error('getProgress error:', error);
+    return null;
   }
+  return data as UserProgress;
 };
 
-// Начислить баллы за уровень
+// Сохранить / обновить прогресс
+export const saveProgress = async (uid: string, data: Partial<UserProgress>) => {
+  const { error } = await supabase
+    .from('users')
+    .upsert({
+      id: uid,
+      ...data,
+      updated_at: new Date().toISOString(),
+    });
+  if (error) console.error('saveProgress error:', error);
+};
+
+// Прибавить баллы
 export const addScore = async (uid: string, points: number) => {
-  await updateDoc(doc(db, 'users', uid), {
-    totalScore: increment(points),
-    updatedAt: Date.now(),
-  });
+  const existing = await getProgress(uid);
+  const newScore = (existing?.total_score || 0) + points;
+  await saveProgress(uid, { total_score: newScore });
 };
 
-// Получить топ-15 игроков (для рейтинга)
-export const getLeaderboard = async () => {
-  const q = query(
-    collection(db, 'users'),
-    orderBy('totalScore', 'desc'),
-    limit(15)
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+// Получить топ игроков
+export const getLeaderboard = async (): Promise<UserProgress[]> => {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .order('total_score', { ascending: false })
+    .limit(15);
+  if (error) {
+    console.error('getLeaderboard error:', error);
+    return [];
+  }
+  return data as UserProgress[];
 };
