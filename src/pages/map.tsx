@@ -303,7 +303,7 @@ const MapPage = () => {
             style={{ left: `${lvl.x + offsetX}%`, top: `${lvl.y + offsetY}%` }}
             title={`${displayName} — Уровень ${p.level}, баллы: ${p.total_score || 0}`}
           >
-            {isMe ? '🎯' : (p.avatar || '🧗')}
+            {isMe ? '🐺' : (p.avatar || '🧗')}
           </div>
         );
       })}
