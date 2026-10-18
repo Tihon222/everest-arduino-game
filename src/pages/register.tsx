@@ -2,13 +2,16 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabase';
+import AvatarPicker from '../components/AvatarPicker';
 import './auth.css';
 
 const Register = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
+  const [nickname, setNickname] = useState('');
   const [error, setError] = useState('');
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,13 +20,40 @@ const Register = () => {
       setError('Пароль должен быть не короче 6 символов');
       return;
     }
+    if (nickname.trim().length < 3) {
+      setError('Ник должен быть не короче 3 символов');
+      return;
+    }
+    setShowAvatarPicker(true); // Показываем выбор аватара
+  };
+
+  const handleAvatarSelect = async (avatar: string) => {
+    setShowAvatarPicker(false);
     try {
-      const { error } = await supabase.auth.signUp({ email, password: pass });
-      if (error) throw error;
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: pass,
+      });
+
+      if (error) {
+        if (error.message.includes('already registered')) setError('Email уже зарегистрирован');
+        else if (error.message.includes('invalid')) setError('Некорректный email');
+        else setError('Ошибка регистрации: ' + error.message);
+        return;
+      }
+
+      // Сохраняем аватар и ник в таблицу users
+      if (data.user) {
+        await supabase
+          .from('users')
+          .update({ avatar, nickname: nickname.trim() })
+          .eq('id', data.user.id);
+      }
+
       alert('Регистрация успешна! Теперь войди.');
       navigate('/login');
     } catch (err: any) {
-      setError(err.message || 'Ошибка регистрации.');
+      setError('Ошибка регистрации: ' + err.message);
     }
   };
 
@@ -32,13 +62,42 @@ const Register = () => {
       <div className="auth-card">
         <h2>Регистрация</h2>
         <form onSubmit={handleRegister}>
-          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <input type="password" placeholder="Пароль (мин. 6 символов)" value={pass} onChange={(e) => setPass(e.target.value)} required />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Твой ник (мин. 3 символа)"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            required
+            maxLength={15}
+          />
+          <input
+            type="password"
+            placeholder="Пароль (мин. 6 символов)"
+            value={pass}
+            onChange={(e) => setPass(e.target.value)}
+            required
+          />
           {error && <p style={{ color: '#f85149', fontSize: 13, marginBottom: 10 }}>{error}</p>}
           <button type="submit" className="auth-submit">Создать аккаунт</button>
         </form>
-        <p className="auth-footer">Уже есть аккаунт? <Link to="/login">Войти</Link></p>
+        <p className="auth-footer">
+          Уже есть аккаунт? <Link to="/login">Войти</Link>
+        </p>
       </div>
+
+      {showAvatarPicker && (
+        <AvatarPicker
+          onSelect={handleAvatarSelect}
+          onCancel={() => setShowAvatarPicker(false)}
+        />
+      )}
     </div>
   );
 };

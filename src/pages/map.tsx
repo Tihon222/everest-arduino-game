@@ -33,7 +33,6 @@ const MapPage = () => {
   const prevLevelRef = useRef(currentLevel);
   const animationRef = useRef<number | null>(null);
 
-  // Функция перезагрузки данных из базы
   const reloadProgress = async () => {
     try {
       const players = await getLeaderboard();
@@ -47,7 +46,6 @@ const MapPage = () => {
     }
   };
 
-  // Загрузка прогресса из localStorage
   useEffect(() => {
     const saved = localStorage.getItem('everest_progress');
     if (saved) {
@@ -61,7 +59,6 @@ const MapPage = () => {
     }
   }, []);
 
-  // Загрузка рейтинга
   useEffect(() => {
     const load = async () => {
       try {
@@ -88,7 +85,6 @@ const MapPage = () => {
     load();
   }, [user]);
 
-  // Анимация падения: съезд с 11 на 10, потом отдых
   useEffect(() => {
     if (!isFallingAnim) return;
 
@@ -108,7 +104,6 @@ const MapPage = () => {
         if (!a || !b) {
           setIsFallingAnim(false);
           if (user) {
-            // ВАЖНО: после startRest обновляем myProgress, чтобы появился таймер
             startRest(user.id, 10)
               .then(() => reloadProgress())
               .catch(e => console.error('startRest error:', e));
@@ -135,7 +130,6 @@ const MapPage = () => {
     };
   }, [isFallingAnim, user]);
 
-  // Обратный отсчёт отдыха — ЖЕСТКАЯ разблокировка при 0
   useEffect(() => {
     if (!myProgress?.rest_until) {
       setRestLeft(0);
@@ -150,14 +144,11 @@ const MapPage = () => {
 
       if (left <= 0) {
         clearInterval(interval);
-
-        // 1. Мгновенно снимаем блокировку в интерфейсе
         setRestLeft(0);
         setMyProgress((prev: any) =>
           prev ? { ...prev, rest_until: null, is_falling: false } : prev
         );
 
-        // 2. В фоне синхронизируем с базой
         if (user) {
           try {
             await endRest(user.id);
@@ -172,7 +163,6 @@ const MapPage = () => {
     return () => clearInterval(interval);
   }, [myProgress, user]);
 
-  // Обычная анимация перехода
   useEffect(() => {
     if (isFallingAnim) return;
     const prevLvl = LEVELS.find((l) => l.id === prevLevelRef.current) || LEVELS[0];
@@ -242,7 +232,6 @@ const MapPage = () => {
         </button>
       </div>
 
-      {/* Таймер отдыха — виден всегда, пока идёт отдых */}
       {restLeft > 0 && (
         <div className="rest-timer-display">
           <span className="rest-timer-label">Отдых</span>
@@ -251,7 +240,6 @@ const MapPage = () => {
         </div>
       )}
 
-      {/* Плашка по центру (для акцента) */}
       {restLeft > 0 && (
         <div className="rest-banner">
           <div className="rest-icon">💤</div>
@@ -297,20 +285,25 @@ const MapPage = () => {
         );
       })}
 
+      {/* Аватары других игроков */}
       {realPlayers.map((p: any, idx: number) => {
         const lvl = LEVELS.find((l) => l.id === (p.level || 1)) || LEVELS[0];
-        const offsetX = Math.sin(idx * 1.7) * 4;
-        const offsetY = Math.cos(idx * 1.3) * 3;
+        
+        // Смещение вправо-вверх, чтобы не закрывать цифру
+        const offsetX = 12 + (idx % 3) * 3;
+        const offsetY = -12 - (idx % 2) * 2;
+        
         const isMe = p.id === user?.id;
+        const displayName = p.nickname || p.email?.split('@')[0] || 'Аноним';
 
         return (
           <div
             key={p.id}
             className={`fake-player ${isMe ? 'me' : ''}`}
             style={{ left: `${lvl.x + offsetX}%`, top: `${lvl.y + offsetY}%` }}
-            title={p.is_falling ? `${p.email} — упал` : `Уровень ${p.level}, баллы: ${p.total_score || 0}`}
+            title={`${displayName} — Уровень ${p.level}, баллы: ${p.total_score || 0}`}
           >
-            {isMe ? '🎯' : '🧗'}
+            {isMe ? '🎯' : (p.avatar || '🧗')}
           </div>
         );
       })}
@@ -334,6 +327,7 @@ const MapPage = () => {
               {realPlayers.map((p: any, idx: number) => {
                 const isMe = p.id === user?.id;
                 const isFalling = p.is_falling;
+                const displayName = p.nickname || p.email?.split('@')[0] || p.id.slice(0, 8);
 
                 return (
                   <li key={p.id}>
@@ -342,9 +336,12 @@ const MapPage = () => {
                       {isFalling ? (
                         <span style={{ color: '#ff4d4d' }}>УПАЛ 😵</span>
                       ) : isMe ? (
-                        'ВЫ'
+                        `ВЫ (${displayName})`
                       ) : (
-                        p.email?.split('@')[0] || p.id.slice(0, 8)
+                        <>
+                          <span style={{ marginRight: 4 }}>{p.avatar || '🧗'}</span>
+                          {displayName}
+                        </>
                       )}
                     </span>
                     <span className="rating-level">Ур. {p.level || 1}</span>
