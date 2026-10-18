@@ -285,13 +285,13 @@ const MapPage = () => {
         );
       })}
 
-      {/* Аватары других игроков */}
+      {/* Аватары игроков */}
       {realPlayers.map((p: any, idx: number) => {
         const lvl = LEVELS.find((l) => l.id === (p.level || 1)) || LEVELS[0];
         
-        // Смещение вправо-вверх, чтобы не закрывать цифру
-        const offsetX = 12 + (idx % 3) * 3;
-        const offsetY = -12 - (idx % 2) * 2;
+        // Ближе к узлу, чуть выше и правее
+        const offsetX = 5 + (idx % 3) * 3;
+        const offsetY = -10 - (idx % 2) * 2;
         
         const isMe = p.id === user?.id;
         const displayName = p.nickname || p.email?.split('@')[0] || 'Аноним';
