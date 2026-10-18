@@ -5,6 +5,7 @@ import { LEVELS } from '../../data/levels';
 import { THEORY } from '../../data/theory';
 import TheoryModal from '../../components/TheoryModal';
 import FallingScreen from '../../components/FallingScreen';
+import FinalScreen from '../../components/FinalScreen';
 import { useAuth } from '../../context/AuthContext';
 import { getProgress, saveProgress, addScore } from '../../services/progress';
 import './lesson.css';
@@ -23,6 +24,8 @@ const LessonPage = () => {
   const [showTheory, setShowTheory] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [isFalling, setIsFalling] = useState(false);
+  const [showFinal, setShowFinal] = useState(false);
+  const [finalData, setFinalData] = useState({ nickname: '', avatar: '', totalScore: 0 });
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -31,6 +34,7 @@ const LessonPage = () => {
       setOutput('Готов к запуску...');
       setStatus('idle');
       setAttempts(0);
+      setShowFinal(false);
     }
   }, [levelId]);
 
@@ -183,6 +187,8 @@ const LessonPage = () => {
       localStorage.setItem('everest_progress', String(nextLevel));
     }
 
+    let savedProgress: any = null;
+
     if (user) {
       try {
         const existing = await getProgress(user.id);
@@ -203,12 +209,27 @@ const LessonPage = () => {
         });
 
         await addScore(user.id, points);
+
+        // Перечитываем свежие данные для финального экрана
+        savedProgress = await getProgress(user.id);
       } catch (e) {
         console.error('Ошибка сохранения прогресса:', e);
       }
     }
 
     if (timerRef.current) clearInterval(timerRef.current);
+
+    // Финальный экран после 30-го уровня
+    if (levelId === 30) {
+      setFinalData({
+        nickname: savedProgress?.nickname || user?.email?.split('@')[0] || 'Игрок',
+        avatar: savedProgress?.avatar || '🧗',
+        totalScore: savedProgress?.total_score || 0,
+      });
+      setShowFinal(true);
+      return;
+    }
+
     navigate('/map');
   };
 
@@ -308,6 +329,15 @@ const LessonPage = () => {
             setIsFalling(false);
             navigate('/map');
           }}
+        />
+      )}
+
+      {showFinal && (
+        <FinalScreen
+          nickname={finalData.nickname}
+          avatar={finalData.avatar}
+          totalScore={finalData.totalScore}
+          totalLevels={30}
         />
       )}
     </div>
