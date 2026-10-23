@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { LEVELS } from '../../data/levels';
 import { THEORY } from '../../data/theory';
+import { THEORY_DETAILED } from '../../data/theoryDetailed';
 import TheoryModal from '../../components/TheoryModal';
 import FallingScreen from '../../components/FallingScreen';
 import FinalScreen from '../../components/FinalScreen';
@@ -22,6 +23,7 @@ const LessonPage = () => {
   const [status, setStatus] = useState<'idle' | 'passed' | 'failed'>('idle');
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showTheory, setShowTheory] = useState(false);
+  const [showDetailedTheory, setShowDetailedTheory] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [isFalling, setIsFalling] = useState(false);
   const [showFinal, setShowFinal] = useState(false);
@@ -210,7 +212,6 @@ const LessonPage = () => {
 
         await addScore(user.id, points);
 
-        // Перечитываем свежие данные для финального экрана
         savedProgress = await getProgress(user.id);
       } catch (e) {
         console.error('Ошибка сохранения прогресса:', e);
@@ -219,7 +220,6 @@ const LessonPage = () => {
 
     if (timerRef.current) clearInterval(timerRef.current);
 
-    // Финальный экран после 30-го уровня
     if (levelId === 30) {
       setFinalData({
         nickname: savedProgress?.nickname || user?.email?.split('@')[0] || 'Игрок',
@@ -241,9 +241,6 @@ const LessonPage = () => {
             Уровень {id}: {level.title}
             {level.type === 'fix' && ' ⚠ ОБРЫВ'}
           </h1>
-          {level.reference && (
-            <div className="level-reference">{level.reference}</div>
-          )}
         </div>
 
         {timeLeft !== null && (
@@ -253,9 +250,14 @@ const LessonPage = () => {
         )}
 
         <div className="header-actions">
+          {THEORY_DETAILED[levelId] && level.type !== 'fix' && (
+            <button className="theory-btn" onClick={() => setShowDetailedTheory(true)}>
+              📘 Теория
+            </button>
+          )}
           {THEORY[levelId] && level.type !== 'fix' && (
             <button className="theory-btn" onClick={() => setShowTheory(true)}>
-              📘 Теория
+              📝 Конспект
             </button>
           )}
           <Link to="/map" className="exit-btn">Выйти на карту</Link>
@@ -315,10 +317,20 @@ const LessonPage = () => {
         {status !== 'passed' ? 'Сначала запусти код' : 'Завершить уровень →'}
       </button>
 
+      {showDetailedTheory && THEORY_DETAILED[levelId] && (
+        <TheoryModal
+          title={THEORY_DETAILED[levelId].title}
+          content={THEORY_DETAILED[levelId].content}
+          mode="theory"
+          onClose={() => setShowDetailedTheory(false)}
+        />
+      )}
+
       {showTheory && THEORY[levelId] && (
         <TheoryModal
           title={THEORY[levelId].title}
           content={THEORY[levelId].content}
+          mode="notes"
           onClose={closeTheory}
         />
       )}
