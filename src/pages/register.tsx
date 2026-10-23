@@ -24,7 +24,7 @@ const Register = () => {
       setError('Ник должен быть не короче 3 символов');
       return;
     }
-    setShowAvatarPicker(true); // Показываем выбор аватара
+    setShowAvatarPicker(true);
   };
 
   const handleAvatarSelect = async (avatar: string) => {
@@ -42,12 +42,31 @@ const Register = () => {
         return;
       }
 
-      // Сохраняем аватар и ник в таблицу users
+      // Если пользователь уже существует, Supabase вернёт пустой identities
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setError('Этот email уже зарегистрирован. Попробуй войти.');
+        return;
+      }
+
+      // Сохраняем профиль в таблицу users через upsert
       if (data.user) {
-        await supabase
+        const { error: upsertError } = await supabase
           .from('users')
-          .update({ avatar, nickname: nickname.trim() })
-          .eq('id', data.user.id);
+          .upsert({
+            id: data.user.id,
+            email: data.user.email,
+            avatar,
+            nickname: nickname.trim(),
+            level: 1,
+            total_score: 0,
+            attempts: {},
+          });
+
+        if (upsertError) {
+          console.error('Ошибка создания профиля:', upsertError);
+          setError('Ошибка создания профиля: ' + upsertError.message);
+          return;
+        }
       }
 
       alert('Регистрация успешна! Теперь войди.');

@@ -42,14 +42,15 @@
 .avatar-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 20px;
+  padding: 0 5px;
 }
 
 .avatar-option {
   width: 100%;
-  aspect-ratio: 1;
-  font-size: 28px;
+  aspect-ratio: 1 / 1;
+  font-size: 24px;
   border: 2px solid #30363d;
   border-radius: 10px;
   background: #0d1117;
@@ -58,6 +59,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .avatar-option:hover {
@@ -130,7 +134,7 @@
 
 @media (max-width: 768px) {
   .avatar-modal { padding: 20px; }
-  .avatar-grid { grid-template-columns: repeat(4, 1fr); }
-  .avatar-option { font-size: 22px; }
+  .avatar-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .avatar-option { font-size: 20px; }
   .avatar-modal h2 { font-size: 1.2rem; }
 }
