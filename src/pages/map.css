@@ -1,4 +1,6 @@
-/* ─────────── Основные стили карты ─────────── */
+/* src/pages/map.css */
+
+/* ─────────── Базовые стили ─────────── */
 .map-container {
   position: relative;
   width: 100vw;
@@ -14,7 +16,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(10, 25, 41, 0.55) 0%, rgba(13, 17, 23, 0.75) 100%);
+  background: linear-gradient(180deg, rgba(10, 25, 41, 0.65) 0%, rgba(13, 17, 23, 0.85) 100%);
   z-index: 0;
   pointer-events: none;
 }
@@ -29,7 +31,7 @@
   z-index: 2;
 }
 
-/* ─────────── Узлы ─────────── */
+/* ─────────── Узлы (маленькие) ─────────── */
 .level-node {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -42,63 +44,64 @@
 }
 
 .level-node:hover {
-  transform: translate(-50%, -50%) scale(1.1);
+  transform: translate(-50%, -50%) scale(1.08);
 }
 
 .node-box {
-  width: 50px;
-  height: 50px;
-  border: 2px solid #30363d;
-  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #30363d;
+  border-radius: 6px;
   background: rgba(22, 27, 34, 0.95);
   display: flex;
   justify-content: center;
   align-items: center;
   color: #8b949e;
   font-weight: bold;
-  font-size: 18px;
+  font-size: 12px;
   backdrop-filter: blur(4px);
+  transition: all 0.2s;
 }
 
 .level-node.passed .node-box {
   border-color: #d4b106;
   background: rgba(61, 51, 0, 0.95);
   color: #d4b106;
-  box-shadow: 0 0 12px rgba(212, 177, 6, 0.6);
+  box-shadow: 0 0 8px rgba(212, 177, 6, 0.4);
 }
 
 .level-node.current .node-box {
   border-color: #58a6ff;
   background: rgba(13, 42, 74, 0.95);
   color: #58a6ff;
-  box-shadow: 0 0 20px #58a6ff;
-  animation: pulse 2s infinite;
+  box-shadow: 0 0 15px #58a6ff;
+  animation: pulse-node 2s infinite;
 }
 
 .level-node.rest-blocked .node-box {
   border-color: #8b0000;
   background: #1a0000;
   color: #8b0000;
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
   animation: none;
 }
 
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 0 20px #58a6ff; }
-  50% { box-shadow: 0 0 35px #58a6ff; }
+@keyframes pulse-node {
+  0%, 100% { box-shadow: 0 0 15px #58a6ff; }
+  50% { box-shadow: 0 0 25px #58a6ff; }
 }
 
 .node-title {
-  margin-top: 6px;
-  font-size: 12px;
+  margin-top: 3px;
+  font-size: 8px;
   color: #c9d1d9;
   white-space: nowrap;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .level-node:not(.passed):not(.current):not(.rest-blocked) {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -106,10 +109,10 @@
 .player-icon {
   position: absolute;
   transform: translate(-50%, -50%);
-  font-size: 26px;
+  font-size: 18px;
   color: #58a6ff;
   z-index: 5;
-  filter: drop-shadow(0 0 10px #58a6ff);
+  filter: drop-shadow(0 0 8px #58a6ff);
   pointer-events: none;
 }
 
@@ -118,8 +121,8 @@
 }
 
 @keyframes falling-pulse {
-  0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px #ff4d4d); color: #ff4d4d; }
-  50% { opacity: 0.3; filter: drop-shadow(0 0 20px #ff0000); color: #ff0000; }
+  0%, 100% { opacity: 1; color: #ff4d4d; }
+  50% { opacity: 0.3; color: #ff0000; }
 }
 
 /* ─────────── Верхняя панель ─────────── */
@@ -131,7 +134,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px;
+  padding: 8px 12px;
   z-index: 10;
   background: linear-gradient(180deg, rgba(10, 25, 41, 0.9) 0%, transparent 100%);
 }
@@ -143,196 +146,186 @@
   font-family: monospace;
 }
 
-.round-label { font-size: 12px; opacity: 0.7; }
-.round-number { font-size: 28px; font-weight: bold; }
-.players-count { color: #c9d1d9; font-size: 14px; }
+.round-label { font-size: 9px; opacity: 0.7; text-transform: uppercase; }
+.round-number { font-size: 20px; font-weight: bold; line-height: 1; }
+.players-count { color: #8b949e; font-size: 11px; font-family: monospace; }
 
 .rating-btn {
   background: rgba(13, 17, 23, 0.9);
   color: #d4b106;
   border: 1px solid #d4b106;
-  padding: 6px 14px;
-  border-radius: 4px;
-  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
-.rating-btn:hover {
-  background: #d4b106;
-  color: #0d1117;
-}
+.rating-btn:hover { background: #d4b106; color: #0d1117; }
 
-/* ─────────── Таймер отдыха (правый верхний угол) ─────────── */
+/* ─────────── Таймер и плашка отдыха ─────────── */
 .rest-timer-display {
   position: absolute;
-  top: 70px;
-  right: 20px;
-  background: rgba(139, 0, 0, 0.95);
+  top: 56px;
+  right: 10px;
+  background: rgba(139, 0, 0, 0.9);
   border: 1px solid #ff4d4d;
-  border-radius: 8px;
-  padding: 8px 14px;
+  border-radius: 6px;
+  padding: 4px 8px;
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
   z-index: 100;
-  box-shadow: 0 0 15px rgba(255, 77, 77, 0.6);
   animation: pulse-rest 1.5s infinite;
 }
 
-.rest-timer-label {
-  font-size: 11px;
-  color: #ffcccc;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
+.rest-timer-label { font-size: 8px; color: #ffcccc; text-transform: uppercase; }
+.rest-timer-value { font-size: 16px; font-weight: bold; font-family: monospace; color: #ff4d4d; }
+.rest-timer-unit { font-size: 8px; color: #ffcccc; }
 
-.rest-timer-value {
-  font-size: 22px;
-  font-weight: bold;
-  font-family: monospace;
-  color: #ff4d4d;
-  line-height: 1;
-}
-
-.rest-timer-unit {
-  font-size: 11px;
-  color: #ffcccc;
-}
-
-/* ─────────── Плашка отдыха по центру ─────────── */
 .rest-banner {
   position: absolute;
-  top: 120px;
+  top: 90px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(139, 0, 0, 0.92);
+  background: rgba(139, 0, 0, 0.9);
   border: 1px solid #ff4d4d;
-  border-radius: 12px;
-  padding: 15px 25px;
+  border-radius: 8px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 8px;
   z-index: 100;
-  box-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
   animation: pulse-rest 2s infinite;
 }
 
-.rest-icon { font-size: 32px; }
-
-.rest-text {
-  display: flex;
-  flex-direction: column;
-  color: #fff;
-}
-
-.rest-text strong {
-  font-size: 13px;
-  color: #ffcccc;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.rest-text span {
-  font-size: 20px;
-  font-weight: bold;
-  font-family: monospace;
-  color: #ff4d4d;
-}
+.rest-icon { font-size: 22px; }
+.rest-text { display: flex; flex-direction: column; color: #fff; }
+.rest-text strong { font-size: 9px; color: #ffcccc; text-transform: uppercase; }
+.rest-text span { font-size: 14px; font-weight: bold; font-family: monospace; color: #ff4d4d; }
 
 @keyframes pulse-rest {
-  0%, 100% { box-shadow: 0 0 20px rgba(255, 77, 77, 0.5); }
-  50% { box-shadow: 0 0 40px rgba(255, 77, 77, 0.8); }
+  0%, 100% { box-shadow: 0 0 15px rgba(255, 77, 77, 0.5); }
+  50% { box-shadow: 0 0 25px rgba(255, 77, 77, 0.8); }
 }
 
-/* ─────────── Игроки из базы ─────────── */
+/* ─────────── Аватары игроков ─────────── */
 .fake-player {
   position: absolute;
   transform: translate(-50%, -50%);
-  font-size: 22px;
+  font-size: 16px;
   opacity: 1;
   z-index: 4;
   pointer-events: none;
-  /* Яркая обводка: тёмная + светлая, чтобы видно на любом фоне */
-  filter: drop-shadow(0 0 4px #000) drop-shadow(0 0 2px #fff);
+  filter: drop-shadow(0 0 3px #000) drop-shadow(0 0 1px #fff);
   transition: opacity 0.3s;
 }
+
 /* ─────────── Панель рейтинга ─────────── */
 .rating-panel {
   position: absolute;
-  top: 80px;
-  right: 30px;
-  width: 320px;
-  max-height: 70vh;
+  top: 56px;
+  left: 8px;
+  right: 8px;
+  max-height: 60vh;
   overflow-y: auto;
-  background: rgba(13, 17, 23, 0.97);
-  border: 1px solid #d4b106;
+  background: rgba(13, 17, 23, 0.95);
+  border: 1px solid #30363d;
   border-radius: 8px;
-  padding: 20px;
+  padding: 12px;
   z-index: 20;
   color: #c9d1d9;
 }
 
 .rating-panel h2 {
   color: #d4b106;
-  font-size: 16px;
-  letter-spacing: 2px;
+  font-size: 12px;
+  letter-spacing: 1px;
   text-align: center;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   text-transform: uppercase;
 }
 
-.rating-panel ol { list-style: none; padding: 0; }
+.rating-panel ol { list-style: none; padding: 0; margin: 0; }
 
 .rating-panel li {
   display: grid;
-  grid-template-columns: 30px 1fr auto auto;
+  grid-template-columns: 22px 1fr auto auto;
   align-items: center;
-  gap: 8px;
-  padding: 6px 0;
+  gap: 6px;
+  padding: 4px 0;
   border-bottom: 1px solid #21262d;
-  font-size: 13px;
+  font-size: 11px;
 }
 
-.rating-avatar { font-size: 16px; }
-.rating-name { font-weight: bold; }
-.rating-level { color: #8b949e; font-size: 11px; }
+.rating-avatar { font-size: 12px; color: #8b949e; }
+.rating-name { font-weight: 600; color: #c9d1d9; }
+.rating-level { color: #8b949e; font-size: 9px; }
 .rating-score { color: #d4b106; font-family: monospace; }
 
-/* ─────────── Мобильная версия ─────────── */
-@media (max-width: 768px) {
-  .map-topbar { padding: 10px 15px; }
-  .round-label { font-size: 10px; }
-  .round-number { font-size: 20px; }
-  .players-count { font-size: 11px; }
-  .rating-btn { font-size: 11px; padding: 4px 10px; }
-  .node-box { width: 34px; height: 34px; font-size: 13px; }
+/* ─────────── Телефоны (480px+) ─────────── */
+@media (min-width: 480px) {
+  .node-box { width: 36px; height: 36px; font-size: 13px; }
   .node-title { font-size: 9px; }
-  .player-icon { font-size: 18px; }
-  .fake-player { display: none; }
+  .player-icon { font-size: 20px; }
+  .fake-player { font-size: 18px; }
+  .map-topbar { padding: 10px 15px; }
+  .round-number { font-size: 22px; }
+  .players-count { font-size: 12px; }
+  .rating-btn { font-size: 12px; padding: 6px 12px; }
+  .rating-panel { left: 15px; right: 15px; }
+}
+
+/* ─────────── Планшеты (768px+) ─────────── */
+@media (min-width: 768px) {
+  .node-box { width: 44px; height: 44px; font-size: 15px; border-radius: 8px; }
+  .node-title { font-size: 11px; margin-top: 4px; }
+  .player-icon { font-size: 22px; }
+  .fake-player { font-size: 20px; }
+  .map-topbar { padding: 12px 24px; }
+  .round-label { font-size: 10px; }
+  .round-number { font-size: 26px; }
+  .players-count { font-size: 13px; }
+  .rating-btn { font-size: 12px; padding: 6px 14px; }
 
   .rating-panel {
-    top: 60px;
-    right: 8px;
-    left: 8px;
-    width: auto;
-    max-height: 60vh;
+    top: 64px;
+    right: 20px;
+    left: auto;
+    width: 300px;
+    max-height: 65vh;
+    padding: 18px;
   }
 
-  .rest-timer-display {
-    top: 60px;
-    right: 10px;
-    padding: 6px 10px;
-  }
-  .rest-timer-value { font-size: 18px; }
-  .rest-timer-label { font-size: 9px; }
-  .rest-timer-unit { font-size: 9px; }
+  .rating-panel h2 { font-size: 14px; letter-spacing: 2px; }
+  .rating-panel li { grid-template-columns: 26px 1fr auto auto; gap: 8px; font-size: 12px; padding: 6px 0; }
+  .rating-avatar { font-size: 14px; }
+  .rating-level { font-size: 10px; }
 
-  .rest-banner {
-    top: 100px;
-    padding: 10px 15px;
-    gap: 10px;
-  }
-  .rest-icon { font-size: 24px; }
+  .rest-timer-display { top: 64px; right: 20px; padding: 6px 12px; }
+  .rest-timer-value { font-size: 20px; }
+  .rest-timer-label, .rest-timer-unit { font-size: 10px; }
+
+  .rest-banner { top: 110px; padding: 12px 20px; gap: 12px; border-radius: 10px; }
+  .rest-icon { font-size: 28px; }
   .rest-text strong { font-size: 11px; }
-  .rest-text span { font-size: 16px; }
+  .rest-text span { font-size: 18px; }
+}
+
+/* ─────────── Ноутбуки (1024px+) ─────────── */
+@media (min-width: 1024px) {
+  .node-box { width: 50px; height: 50px; font-size: 17px; }
+  .node-title { font-size: 12px; }
+  .player-icon { font-size: 26px; }
+  .fake-player { font-size: 22px; }
+}
+
+/* ─────────── Большие мониторы (1440px+) ─────────── */
+@media (min-width: 1440px) {
+  .node-box { width: 56px; height: 56px; font-size: 19px; }
+  .node-title { font-size: 13px; }
+  .player-icon { font-size: 30px; }
+  .fake-player { font-size: 24px; }
+  .round-number { font-size: 32px; }
+  .rating-panel { width: 340px; }
 }

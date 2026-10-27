@@ -1,286 +1,338 @@
+/* src/pages/lesson/lesson.css */
+
+/* ─────────── Базовые стили (mobile-first) ─────────── */
 .lesson-container {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  padding: 6px;
+  background: #0d1117;
+  color: #c9d1d9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
 }
 
 .lesson-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 8px 12px;
   background: #161b22;
+  border: 1px solid #21262d;
   border-radius: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .lesson-header h1 {
-  font-size: 1.5rem;
+  font-size: 1rem;
+  color: #d4b106;
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.level-reference {
+  font-size: 10px;
+  color: #8b949e;
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.theory-btn,
+.exit-btn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.theory-btn {
+  background: transparent;
   color: #58a6ff;
+  border: 1px solid #58a6ff;
+}
+
+.theory-btn:hover {
+  background: #58a6ff;
+  color: #0d1117;
 }
 
 .exit-btn {
+  background: transparent;
   color: #f85149;
+  border: 1px solid #f85149;
+}
+
+.exit-btn:hover {
+  background: #f85149;
+  color: #fff;
+}
+
+.timer {
+  background: #1f6feb;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
   font-weight: bold;
 }
 
+.timer.danger {
+  background: #f85149;
+  animation: pulse-timer 1s infinite;
+}
+
+@keyframes pulse-timer {
+  0%, 100% { box-shadow: 0 0 8px #f85149; }
+  50% { box-shadow: 0 0 20px #f85149; }
+}
+
+.arduino-hint {
+  background: rgba(88, 166, 255, 0.08);
+  border-left: 3px solid #58a6ff;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: #c9d1d9;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+.arduino-hint code {
+  background: #0d1117;
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: #79c0ff;
+  font-family: monospace;
+  font-size: 10px;
+}
+
+/* Основной блок: на мобилке — колонка */
 .lesson-body {
   display: flex;
   flex: 1;
-  gap: 10px;
-  margin-bottom: 10px;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 6px;
+  min-height: 0;
+}
+
+.code-editor-panel,
+.task-panel {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.task-panel {
+  order: -1;
+  max-height: 100px;
 }
 
 .code-editor-panel {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  background: #0d1117;
-  border: 1px solid #30363d;
-  border-radius: 8px;
-}
-
-.task-panel {
-  width: 350px;
-  background: #0d1117;
-  border: 1px solid #30363d;
-  border-radius: 8px;
+  min-height: 150px;
 }
 
 .panel-header {
-   display: flex;
+  background: #1c2128;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #21262d;
+  display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .code-area {
+  flex: 1;
   background: #0d1117;
   color: #c9d1d9;
   border: none;
-  padding: 15px;
-  font-family: monospace;
-  font-size: 14px;
+  padding: 8px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 12px;
+  line-height: 1.5;
   resize: none;
   outline: none;
-}
-
-.run-btn {
-  margin: 10px;
-  background: #238636;
-  border: none;
+  tab-size: 2;
 }
 
 .task-content {
-  padding: 15px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #c9d1d9;
+  overflow-y: auto;
 }
 
-.task-content ul {
-  margin-top: 10px;
-  padding-left: 20px;
+.task-content p {
+  margin: 0;
+}
+
+.run-btn {
+  margin: 6px;
+  padding: 8px;
+  background: #238636;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.run-btn:hover { background: #2ea043; }
+.run-btn.success {
+  background: #2ea043;
+  box-shadow: 0 0 12px rgba(46, 160, 67, 0.4);
+}
+
+.complete-btn {
+  margin: 6px;
+  padding: 10px;
+  background: #d4b106;
+  color: #0d1117;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 44px;
+}
+
+.complete-btn:hover:not(:disabled) {
+  background: #e5c100;
+  box-shadow: 0 0 15px rgba(212, 177, 6, 0.4);
+}
+
+.complete-btn:disabled {
+  background: #21262d;
+  color: #6e7681;
+  cursor: not-allowed;
 }
 
 .serial-monitor {
-    display: flex;
+  height: 100px;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+
+.serial-monitor .panel-header {
+  display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.monitor-output {
-  padding: 15px;
-  font-family: monospace;
-  color: #7ee787;
-  overflow-y: auto;
-  flex: 1;
-  margin: 0;
-}
-
-.complete-btn {
-  background-color: #d4b106;
-  color: #0d1117;
-  font-weight: bold;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
-  margin: 10px;
-  cursor: pointer;
-}
-
-.complete-btn:hover {
-  background-color: #e5c100;
-}
-
-.monitor-output {
-  padding: 15px;
-  font-family: monospace;
-  color: #7ee787;
-  overflow-y: auto;
-  flex: 1;
-  margin: 0;
-  white-space: pre-wrap;
-}
-.level-reference {
-  font-size: 12px;
-  color: #8b949e;
-  font-style: italic;
-  margin-top: 4px;
-} 
-
-/* Кнопка «Запустить код» в успешном состоянии */
-.run-btn.success {
-  background: #238636;
-  border-color: #2ea043;
-}
-
-/* Индикатор статуса в шапке монитора */
 .status-badge {
-  margin-left: auto;
-  font-size: 11px;
-  padding: 2px 8px;
+  font-size: 9px;
+  padding: 2px 6px;
   border-radius: 4px;
   font-family: monospace;
   font-weight: bold;
 }
 
-.status-badge.success {
-  background: #238636;
-  color: white;
+.status-badge.success { background: #238636; color: white; }
+.status-badge.failed { background: #f85149; color: white; }
+
+.monitor-output {
+  flex: 1;
+  padding: 8px;
+  margin: 0;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-y: auto;
 }
 
-.status-badge.failed {
-  background: #f85149;
-  color: white;
-}
-
-/* Цвет вывода монитора в зависимости от статуса */
 .monitor-output.idle { color: #8b949e; }
 .monitor-output.passed { color: #7ee787; }
 .monitor-output.failed { color: #ff7b72; }
 
-/* Кнопка «Завершить» */
-.complete-btn:disabled {
-  background: #21262d;
-  color: #6e7681;
+/* ─────────── Телефоны (480px+) ─────────── */
+@media (min-width: 480px) {
+  .lesson-container { padding: 8px; }
+  .lesson-header { padding: 10px 15px; }
+  .lesson-header h1 { font-size: 1.1rem; }
+  .node-title { font-size: 11px; }
+  .code-area { font-size: 13px; padding: 10px; }
+  .task-content { font-size: 13px; }
+  .serial-monitor { height: 120px; }
 }
 
-/* ═══ МОБИЛЬНАЯ ВЕРСИЯ (≤ 768px) ═══ */
-@media (max-width: 768px) {
-  .lesson-container {
-    padding: 6px;
-    height: auto;
-    min-height: 100vh;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
+/* ─────────── Планшеты (768px+) ─────────── */
+@media (min-width: 768px) {
+  .lesson-container { padding: 12px; }
+  .lesson-header { padding: 12px 20px; border-radius: 10px; }
+  .lesson-header h1 { font-size: 1.3rem; }
+  .level-reference { font-size: 11px; }
+  .header-actions { gap: 10px; }
+  .theory-btn, .exit-btn { font-size: 13px; padding: 6px 14px; }
+  .timer { font-size: 16px; padding: 6px 14px; }
+  .arduino-hint { font-size: 13px; padding: 10px 15px; }
 
-  /* Шапка — компактнее */
-  .lesson-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    padding: 10px 12px;
-    margin-bottom: 6px;
-  }
-
-  .lesson-header h1 {
-    font-size: 1rem;
-    line-height: 1.3;
-  }
-
-  .exit-btn {
-    align-self: flex-end;
-    font-size: 12px;
-  }
-
-  /* Основной блок — колонка, задание сверху */
   .lesson-body {
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 6px;
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 10px;
   }
 
   .task-panel {
-    width: 100%;
-    order: -1;
-    max-height: 140px;
-    overflow-y: auto;
+    width: 300px;
+    max-height: none;
+    order: 0;
   }
 
-  .code-editor-panel {
-    width: 100%;
-    max-height: 260px;
-  }
-
-  .panel-header {
-    font-size: 11px;
-    padding: 5px 10px;
-  }
-
-  .task-content {
-    padding: 8px 10px;
-    font-size: 13px;
-    line-height: 1.4;
-  }
-
-  /* Редактор — ОГРАНИЧЕННАЯ высота, чтобы не растягивался */
-  .code-area {
-    min-height: 140px;
-    max-height: 180px;
-    font-size: 12px;
-    padding: 8px;
-    resize: none;
-  }
-
-  .run-btn {
-    margin: 6px;
-    padding: 8px 14px;
-    font-size: 13px;
-    width: calc(100% - 12px);
-  }
-
-  /* Монитор — компактнее */
-  .serial-monitor {
-    height: auto;
-    max-height: 160px;
-    margin-bottom: 6px;
-  }
-
-  .monitor-output {
-    font-size: 11px;
-    padding: 8px;
-    max-height: 120px;
-    overflow-y: auto;
-  }
-
-  /* Бейдж ПРОЙДЕНО/ОШИБКА — нормальный размер */
-  .status-badge {
-    font-size: 10px;
-    padding: 2px 6px;
-  }
-
-  /* Кнопка завершения — всегда внизу, большой тап-таргет */
-  .complete-btn {
-    width: calc(100% - 12px);
-    margin: 0 6px 20px;
-    padding: 12px;
-    font-size: 15px;
-    min-height: 48px;
-  }
-}
-.arduino-hint {
-  background: rgba(88, 166, 255, 0.1);
-  border-left: 3px solid #58a6ff;
-  padding: 10px 15px;
-  margin-bottom: 10px;
-  font-size: 13px;
-  color: #c9d1d9;
-  border-radius: 4px;
+  .code-editor-panel { flex: 1; }
+  .panel-header { font-size: 12px; padding: 10px 15px; }
+  .code-area { font-size: 14px; padding: 15px; }
+  .task-content { font-size: 14px; padding: 15px; }
+  .run-btn { font-size: 14px; padding: 10px; margin: 10px; }
+  .complete-btn { font-size: 15px; padding: 12px; margin: 0 12px 12px; }
+  .serial-monitor { height: 140px; margin-bottom: 10px; }
+  .monitor-output { font-size: 13px; padding: 12px 15px; }
 }
 
-.arduino-hint code {
-  background: #0d1117;
-  padding: 2px 6px;
-  border-radius: 3px;
-  color: #79c0ff;
-  font-family: monospace;
+/* ─────────── Ноутбуки (1024px+) ─────────── */
+@media (min-width: 1024px) {
+  .task-panel { width: 340px; }
+  .serial-monitor { height: 160px; }
+}
+
+/* ─────────── Большие мониторы (1440px+) ─────────── */
+@media (min-width: 1440px) {
+  .lesson-container { padding: 20px; }
+  .lesson-body { gap: 20px; }
+  .task-panel { width: 400px; }
+  .serial-monitor { height: 200px; }
+  .code-area { font-size: 15px; }
+  .monitor-output { font-size: 14px; }
 }
