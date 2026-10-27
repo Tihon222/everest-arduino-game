@@ -64,7 +64,6 @@ const LessonPage = () => {
         if (prev === null) return prev;
         if (prev <= 1) {
           const fallback = level.fallbackLevel || 1;
-          localStorage.setItem('everest_progress', String(fallback));
           setIsFalling(true);
 
           if (user) {
@@ -150,7 +149,6 @@ const LessonPage = () => {
   const runCode = () => {
     setAttempts((prev) => prev + 1);
 
-    // Проверка на обязательные setup и loop для уровней 16+
     if (levelId >= 16 && (!code.includes('void setup') || !code.includes('void loop'))) {
       setOutput('⚠ ОШИБКА: В коде должны быть функции void setup() и void loop().\n\nЭто обязательные функции Arduino.');
       setStatus('failed');
@@ -190,11 +188,8 @@ const LessonPage = () => {
       return;
     }
 
-    const nextLevel = levelId + 1;
-    const currentProgress = parseInt(localStorage.getItem('everest_progress') || '1');
-    if (nextLevel > currentProgress) {
-      localStorage.setItem('everest_progress', String(nextLevel));
-    }
+    // Защита от уровня 31
+    const nextLevel = Math.min(levelId + 1, LEVELS.length);
 
     let savedProgress: any = null;
 
@@ -271,7 +266,6 @@ const LessonPage = () => {
         </div>
       </header>
 
-      {/* Плашка-напоминание для уровней 16+ */}
       {levelId >= 16 && (
         <div className="arduino-hint">
           💡 Каждый скетч Arduino состоит из двух обязательных функций: <code>void setup()</code> (выполняется один раз) и <code>void loop()</code> (выполняется бесконечно).

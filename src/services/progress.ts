@@ -4,12 +4,16 @@ import { supabase } from '../supabase';
 export interface UserProgress {
   id: string;
   email: string;
+  nickname?: string;
+  avatar?: string;
   level: number;
   total_score: number;
   attempts: Record<number, number>;
   rest_until?: string | null;
   is_falling?: boolean;
 }
+
+const MAX_LEVEL = 30;
 
 export const getProgress = async (uid: string): Promise<UserProgress | null> => {
   const { data, error } = await supabase
@@ -22,6 +26,11 @@ export const getProgress = async (uid: string): Promise<UserProgress | null> => 
 };
 
 export const saveProgress = async (uid: string, data: Partial<UserProgress>) => {
+  // Защита от уровня > 30
+  if (typeof data.level === 'number') {
+    data.level = Math.min(data.level, MAX_LEVEL);
+  }
+
   const { error } = await supabase
     .from('users')
     .update({ ...data, updated_at: new Date().toISOString() })
@@ -59,6 +68,7 @@ export const startRest = async (uid: string, seconds: number = 10) => {
     .update({
       rest_until: restUntil,
       is_falling: true,
+      // Уровень сбрасываем только если он выше 10
       level: 10,
       updated_at: new Date().toISOString(),
     })

@@ -46,19 +46,7 @@ const MapPage = () => {
     }
   };
 
-  useEffect(() => {
-    const saved = localStorage.getItem('everest_progress');
-    if (saved) {
-      const lvl = parseInt(saved);
-      const found = LEVELS.find((x) => x.id === lvl);
-      if (found) {
-        setCurrentLevel(lvl);
-        prevLevelRef.current = lvl;
-        setPlayerPos({ x: found.x, y: found.y });
-      }
-    }
-  }, []);
-
+  // Загрузка рейтинга + уровня из Supabase
   useEffect(() => {
     const load = async () => {
       try {
@@ -67,6 +55,17 @@ const MapPage = () => {
         if (user) {
           const me = players.find((p: any) => p.id === user.id);
           setMyProgress(me || null);
+
+          // Уровень из базы (с защитой от 31)
+          if (me?.level) {
+            const lvl = Math.min(me.level, LEVELS.length);
+            setCurrentLevel(lvl);
+            prevLevelRef.current = lvl;
+            const found = LEVELS.find((x) => x.id === lvl);
+            if (found) {
+              setPlayerPos({ x: found.x, y: found.y });
+            }
+          }
 
           if (me?.is_falling && !me?.rest_until) {
             setIsFallingAnim(true);
@@ -285,14 +284,10 @@ const MapPage = () => {
         );
       })}
 
-      {/* Аватары игроков */}
       {realPlayers.map((p: any, idx: number) => {
         const lvl = LEVELS.find((l) => l.id === (p.level || 1)) || LEVELS[0];
-        
-        // Ближе к узлу, чуть выше и правее
         const offsetX = 5 + (idx % 3) * 3;
         const offsetY = -10 - (idx % 2) * 2;
-        
         const isMe = p.id === user?.id;
         const displayName = p.nickname || p.email?.split('@')[0] || 'Аноним';
 
