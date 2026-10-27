@@ -16,7 +16,7 @@ const Login = () => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
       if (error) throw error;
-      navigate('/map');
+      navigate('/levels');
     } catch (err: any) {
       setError(err.message || 'Ошибка входа.');
     }

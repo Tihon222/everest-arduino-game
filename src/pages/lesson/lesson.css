@@ -12,17 +12,30 @@
   overflow: hidden;
 }
 
+/* ─────────── Шапка ─────────── */
 .lesson-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 10px 14px;
   background: #161b22;
   border: 1px solid #21262d;
-  border-radius: 8px;
-  margin-bottom: 6px;
+  border-radius: 10px;
+  margin-bottom: 8px;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.lesson-header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #238636;
 }
 
 .lesson-header h1 {
@@ -49,7 +62,7 @@
 
 .theory-btn,
 .exit-btn {
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 6px;
   font-size: 11px;
   cursor: pointer;
@@ -80,14 +93,16 @@
   color: #fff;
 }
 
+/* ─────────── Таймер ─────────── */
 .timer {
   background: #1f6feb;
   color: white;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 6px;
   font-family: monospace;
   font-size: 13px;
   font-weight: bold;
+  transition: background 0.3s;
 }
 
 .timer.danger {
@@ -100,33 +115,34 @@
   50% { box-shadow: 0 0 20px #f85149; }
 }
 
+/* ─────────── Плашка Arduino ─────────── */
 .arduino-hint {
   background: rgba(88, 166, 255, 0.08);
   border-left: 3px solid #58a6ff;
   padding: 8px 12px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   font-size: 11px;
   color: #c9d1d9;
-  border-radius: 4px;
+  border-radius: 6px;
   line-height: 1.4;
 }
 
 .arduino-hint code {
   background: #0d1117;
-  padding: 1px 4px;
+  padding: 1px 5px;
   border-radius: 3px;
   color: #79c0ff;
   font-family: monospace;
   font-size: 10px;
 }
 
-/* Основной блок: на мобилке — колонка */
+/* ─────────── Основной блок ─────────── */
 .lesson-body {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 8px;
+  margin-bottom: 8px;
   min-height: 0;
 }
 
@@ -134,10 +150,11 @@
 .task-panel {
   background: #161b22;
   border: 1px solid #21262d;
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .task-panel {
@@ -152,7 +169,7 @@
 
 .panel-header {
   background: #1c2128;
-  padding: 6px 10px;
+  padding: 8px 12px;
   font-size: 10px;
   font-weight: 600;
   color: #8b949e;
@@ -169,19 +186,23 @@
   background: #0d1117;
   color: #c9d1d9;
   border: none;
-  padding: 8px;
+  padding: 10px;
   font-family: 'Fira Code', 'Consolas', monospace;
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.6;
   resize: none;
   outline: none;
   tab-size: 2;
 }
 
+.code-area:focus {
+  background: #0b0f14;
+}
+
 .task-content {
-  padding: 8px 10px;
+  padding: 10px 12px;
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 1.5;
   color: #c9d1d9;
   overflow-y: auto;
 }
@@ -190,13 +211,14 @@
   margin: 0;
 }
 
+/* ─────────── Кнопки ─────────── */
 .run-btn {
-  margin: 6px;
-  padding: 8px;
+  margin: 8px;
+  padding: 10px;
   background: #238636;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -211,16 +233,16 @@
 
 .complete-btn {
   margin: 6px;
-  padding: 10px;
+  padding: 12px;
   background: #d4b106;
   color: #0d1117;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
-  min-height: 44px;
+  min-height: 46px;
 }
 
 .complete-btn:hover:not(:disabled) {
@@ -234,15 +256,17 @@
   cursor: not-allowed;
 }
 
+/* ─────────── Serial Monitor ─────────── */
 .serial-monitor {
   height: 100px;
   background: #161b22;
   border: 1px solid #21262d;
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .serial-monitor .panel-header {
@@ -253,7 +277,7 @@
 
 .status-badge {
   font-size: 9px;
-  padding: 2px 6px;
+  padding: 2px 8px;
   border-radius: 4px;
   font-family: monospace;
   font-weight: bold;
@@ -264,11 +288,11 @@
 
 .monitor-output {
   flex: 1;
-  padding: 8px;
+  padding: 10px;
   margin: 0;
   font-family: 'Fira Code', 'Consolas', monospace;
   font-size: 11px;
-  line-height: 1.4;
+  line-height: 1.5;
   white-space: pre-wrap;
   overflow-y: auto;
 }
@@ -277,21 +301,19 @@
 .monitor-output.passed { color: #7ee787; }
 .monitor-output.failed { color: #ff7b72; }
 
-/* ─────────── Телефоны (480px+) ─────────── */
+/* ─────────── Адаптив ─────────── */
 @media (min-width: 480px) {
   .lesson-container { padding: 8px; }
-  .lesson-header { padding: 10px 15px; }
+  .lesson-header { padding: 12px 16px; }
   .lesson-header h1 { font-size: 1.1rem; }
-  .node-title { font-size: 11px; }
-  .code-area { font-size: 13px; padding: 10px; }
+  .code-area { font-size: 13px; padding: 12px; }
   .task-content { font-size: 13px; }
   .serial-monitor { height: 120px; }
 }
 
-/* ─────────── Планшеты (768px+) ─────────── */
 @media (min-width: 768px) {
   .lesson-container { padding: 12px; }
-  .lesson-header { padding: 12px 20px; border-radius: 10px; }
+  .lesson-header { padding: 14px 20px; border-radius: 12px; }
   .lesson-header h1 { font-size: 1.3rem; }
   .level-reference { font-size: 11px; }
   .header-actions { gap: 10px; }
@@ -301,8 +323,8 @@
 
   .lesson-body {
     flex-direction: row;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 12px;
+    margin-bottom: 12px;
   }
 
   .task-panel {
@@ -315,19 +337,17 @@
   .panel-header { font-size: 12px; padding: 10px 15px; }
   .code-area { font-size: 14px; padding: 15px; }
   .task-content { font-size: 14px; padding: 15px; }
-  .run-btn { font-size: 14px; padding: 10px; margin: 10px; }
-  .complete-btn { font-size: 15px; padding: 12px; margin: 0 12px 12px; }
-  .serial-monitor { height: 140px; margin-bottom: 10px; }
+  .run-btn { font-size: 14px; padding: 12px; margin: 12px; }
+  .complete-btn { font-size: 15px; padding: 14px; margin: 0 12px 12px; }
+  .serial-monitor { height: 140px; margin-bottom: 12px; }
   .monitor-output { font-size: 13px; padding: 12px 15px; }
 }
 
-/* ─────────── Ноутбуки (1024px+) ─────────── */
 @media (min-width: 1024px) {
   .task-panel { width: 340px; }
   .serial-monitor { height: 160px; }
 }
 
-/* ─────────── Большие мониторы (1440px+) ─────────── */
 @media (min-width: 1440px) {
   .lesson-container { padding: 20px; }
   .lesson-body { gap: 20px; }
