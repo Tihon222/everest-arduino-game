@@ -150,6 +150,13 @@ const LessonPage = () => {
   const runCode = () => {
     setAttempts((prev) => prev + 1);
 
+    // Проверка на обязательные setup и loop для уровней 16+
+    if (levelId >= 16 && (!code.includes('void setup') || !code.includes('void loop'))) {
+      setOutput('⚠ ОШИБКА: В коде должны быть функции void setup() и void loop().\n\nЭто обязательные функции Arduino.');
+      setStatus('failed');
+      return;
+    }
+
     if (!code.trim()) {
       setOutput('⚠ ОШИБКА: код не обнаружен.\nНапиши решение в редакторе и нажми «Запустить код».');
       setStatus('failed');
@@ -263,6 +270,13 @@ const LessonPage = () => {
           <Link to="/map" className="exit-btn">Выйти на карту</Link>
         </div>
       </header>
+
+      {/* Плашка-напоминание для уровней 16+ */}
+      {levelId >= 16 && (
+        <div className="arduino-hint">
+          💡 Каждый скетч Arduino состоит из двух обязательных функций: <code>void setup()</code> (выполняется один раз) и <code>void loop()</code> (выполняется бесконечно).
+        </div>
+      )}
 
       <div className="lesson-body">
         <div className="code-editor-panel">
