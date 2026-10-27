@@ -21,7 +21,7 @@ export const getProgress = async (uid: string): Promise<UserProgress | null> => 
     .from('users')
     .select('*')
     .eq('id', uid)
-    .single();
+    .maybeSingle(); // ← изменено с .single()
   if (error) return null;
   return data as UserProgress;
 };
@@ -43,7 +43,7 @@ export const addScore = async (uid: string, points: number) => {
     .from('users')
     .select('total_score')
     .eq('id', uid)
-    .single();
+    .maybeSingle(); // ← изменено с .single()
   const current = data?.total_score || 0;
   await supabase
     .from('users')
