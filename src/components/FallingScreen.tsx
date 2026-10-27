@@ -20,8 +20,8 @@ const FallingScreen: React.FC<FallingScreenProps> = ({ levelId, onDone }) => {
     <div className="falling-overlay">
       <div className="falling-content">
         <div className="falling-arrow">⬇</div>
-        <h1>ТЫ ПАДАЕШЬ!</h1>
-        <p>Время вышло. Возвращайся на 10-й уровень.</p>
+        <h1>ВРЕМЯ ВЫШЛО!</h1>
+        <p>Думай лудше! Пока возвращайся на 10-й уровень.</p>
       </div>
     </div>
   );
