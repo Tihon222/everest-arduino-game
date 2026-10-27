@@ -229,14 +229,14 @@ export const THEORY_DETAILED: Record<number, TheoryDetailed> = {
       'pinMode(пин, режим) настраивает пин как INPUT или OUTPUT. digitalWrite(пин, HIGH/LOW) включает или выключает пин.\n\n' +
       'Где писать pinMode: в setup() один раз.\n' +
       'Где писать digitalWrite: в loop(), если нужно менять состояние.\n\n' +
-      'Пример:\n' +
+      'Пример (пин 7):\n' +
       '  void setup() {\n' +
-      '    pinMode(13, OUTPUT);\n' +
+      '    pinMode(7, OUTPUT);\n' +
       '  }\n' +
       '  void loop() {\n' +
-      '    digitalWrite(13, HIGH);\n' +
+      '    digitalWrite(7, HIGH);\n' +
       '    delay(1000);\n' +
-      '    digitalWrite(13, LOW);\n' +
+      '    digitalWrite(7, LOW);\n' +
       '    delay(1000);\n' +
       '  }\n\n' +
       'Типичная ошибка: забыть pinMode — тогда пин не будет работать как выход.',
@@ -246,12 +246,12 @@ export const THEORY_DETAILED: Record<number, TheoryDetailed> = {
     content:
       'digitalRead(пин) читает состояние пина: HIGH или LOW. Если кнопка нажата и настроен INPUT_PULLUP — вернёт LOW.\n\n' +
       'INPUT_PULLUP — это режим, при котором Arduino сама подтягивает пин к питанию через резистор. Без этого кнопка может «плавать».\n\n' +
-      'Пример:\n' +
+      'Пример (пин 4):\n' +
       '  void setup() {\n' +
-      '    pinMode(2, INPUT_PULLUP);\n' +
+      '    pinMode(4, INPUT_PULLUP);\n' +
       '  }\n' +
       '  void loop() {\n' +
-      '    int state = digitalRead(2);\n' +
+      '    int state = digitalRead(4);\n' +
       '    Serial.println(state);\n' +
       '  }\n\n' +
       'Типичная ошибка: забыть INPUT_PULLUP — тогда кнопка может показывать случайные значения.',
@@ -260,16 +260,16 @@ export const THEORY_DETAILED: Record<number, TheoryDetailed> = {
     title: 'if + digitalRead: реакция на кнопку',
     content:
       'Комбинируя if и digitalRead, можно реагировать на нажатие кнопки.\n\n' +
-      'Пример:\n' +
+      'Пример (кнопка — пин 4, светодиод — пин 7):\n' +
       '  void setup() {\n' +
-      '    pinMode(13, OUTPUT);\n' +
-      '    pinMode(2, INPUT_PULLUP);\n' +
+      '    pinMode(7, OUTPUT);\n' +
+      '    pinMode(4, INPUT_PULLUP);\n' +
       '  }\n' +
       '  void loop() {\n' +
-      '    if (digitalRead(2) == LOW) {\n' +
-      '      digitalWrite(13, HIGH);\n' +
+      '    if (digitalRead(4) == LOW) {\n' +
+      '      digitalWrite(7, HIGH);\n' +
       '    } else {\n' +
-      '      digitalWrite(13, LOW);\n' +
+      '      digitalWrite(7, LOW);\n' +
       '    }\n' +
       '  }\n\n' +
       'Важно: INPUT_PULLUP даёт LOW при нажатии, не HIGH!\n\n' +
@@ -280,10 +280,10 @@ export const THEORY_DETAILED: Record<number, TheoryDetailed> = {
     content:
       'analogWrite(пин, значение) управляет яркостью светодиода или скоростью мотора через ШИМ (PWM). Значение от 0 до 255.\n\n' +
       '0 — выключено, 127 — половина, 255 — максимум.\n\n' +
-      'Пример:\n' +
+      'Пример (пин 6):\n' +
       '  void loop() {\n' +
       '    for (int i = 0; i <= 255; i++) {\n' +
-      '      analogWrite(9, i);\n' +
+      '      analogWrite(6, i);\n' +
       '      delay(10);\n' +
       '    }\n' +
       '  }\n\n' +
@@ -295,12 +295,12 @@ export const THEORY_DETAILED: Record<number, TheoryDetailed> = {
     content:
       'analogRead(пин) читает напряжение с аналогового пина. Возвращает значение от 0 до 1023 (10 бит).\n\n' +
       '0 — 0 Вольт, 512 — примерно 2.5 В, 1023 — 5 Вольт.\n\n' +
-      'Пример:\n' +
+      'Пример (пин A2):\n' +
       '  void setup() {\n' +
       '    Serial.begin(9600);\n' +
       '  }\n' +
       '  void loop() {\n' +
-      '    int value = analogRead(A0);\n' +
+      '    int value = analogRead(A2);\n' +
       '    Serial.println(value);\n' +
       '    delay(100);\n' +
       '  }\n\n' +
@@ -315,7 +315,7 @@ export const THEORY_DETAILED: Record<number, TheoryDetailed> = {
       'Пример:\n' +
       '  unsigned long lastTime = 0;\n' +
       '  void loop() {\n' +
-      '    if (millis() - lastTime >= 1000) {\n' +
+      '    if (millis() - lastTime >= 500) {\n' +
       '      lastTime = millis();\n' +
       '      Serial.println("Тик");\n' +
       '    }\n' +
@@ -327,11 +327,11 @@ export const THEORY_DETAILED: Record<number, TheoryDetailed> = {
     title: 'Счётчик секунд',
     content:
       'Счётчик секунд — переменная, которая увеличивается раз в секунду. Комбинируется с millis().\n\n' +
-      'Пример:\n' +
+      'Пример (счётчик на 500 мс):\n' +
       '  int seconds = 0;\n' +
       '  unsigned long lastTime = 0;\n' +
       '  void loop() {\n' +
-      '    if (millis() - lastTime >= 1000) {\n' +
+      '    if (millis() - lastTime >= 500) {\n' +
       '      lastTime = millis();\n' +
       '      seconds++;\n' +
       '      Serial.println(seconds);\n' +
@@ -343,10 +343,10 @@ export const THEORY_DETAILED: Record<number, TheoryDetailed> = {
     title: 'Кнопка Старт/Стоп',
     content:
       'Чтобы секундомер запускался и останавливался по кнопке, нужна переменная-флаг (bool).\n\n' +
-      'Пример:\n' +
+      'Пример (кнопка — пин 4):\n' +
       '  bool running = false;\n' +
       '  void loop() {\n' +
-      '    if (digitalRead(2) == LOW) {\n' +
+      '    if (digitalRead(4) == LOW) {\n' +
       '      running = !running;\n' +
       '      delay(300);\n' +
       '    }\n' +
@@ -361,8 +361,8 @@ export const THEORY_DETAILED: Record<number, TheoryDetailed> = {
     title: 'Кнопка Сброс',
     content:
       'Вторая кнопка (на другом пине) сбрасывает счётчик в 0.\n\n' +
-      'Пример:\n' +
-      '  if (digitalRead(3) == LOW) {\n' +
+      'Пример (кнопка сброса — пин 5):\n' +
+      '  if (digitalRead(5) == LOW) {\n' +
       '    seconds = 0;\n' +
       '    Serial.println("Сброс!");\n' +
       '    delay(300);\n' +
@@ -374,12 +374,12 @@ export const THEORY_DETAILED: Record<number, TheoryDetailed> = {
     title: 'Остановка на 60 секундах',
     content:
       'Чтобы счётчик не уходил дальше 60, добавь проверку внутри цикла.\n\n' +
-      'Пример:\n' +
-      '  if (seconds >= 60) {\n' +
-      '    seconds = 60;\n' +
+      'Пример (лимит 30):\n' +
+      '  if (seconds >= 30) {\n' +
+      '    seconds = 30;\n' +
       '    running = false;\n' +
       '  }\n\n' +
-      'Важно: сначала увеличь seconds, потом проверь. Иначе на 59 секунде счётчик остановится.\n\n' +
+      'Важно: сначала увеличь seconds, потом проверь. Иначе на 29 секунде счётчик остановится.\n\n' +
       'Типичная ошибка: проверять до увеличения. Тогда секундомер остановится на 59, а не на 60.',
   },
 
@@ -411,11 +411,11 @@ export const THEORY_DETAILED: Record<number, TheoryDetailed> = {
     title: 'Servo: управление мотором',
     content:
       'Сервопривод — мотор, который поворачивается на заданный угол (0–180).\n\n' +
-      'Подключение:\n' +
+      'Подключение (пин 7):\n' +
       '  #include <Servo.h>\n' +
       '  Servo myServo;\n' +
       '  void setup() {\n' +
-      '    myServo.attach(9);\n' +
+      '    myServo.attach(7);\n' +
       '  }\n\n' +
       'Углы: 0 — крайнее левое, 90 — середина, 180 — крайнее правое.\n\n' +
       'Типичная ошибка: подключить серво к пину, который не поддерживает ШИМ. Нужны пины 3, 5, 6, 9, 10, 11.',
@@ -425,12 +425,12 @@ export const THEORY_DETAILED: Record<number, TheoryDetailed> = {
     content:
       'random(max) возвращает число от 0 до max-1. random(min, max) — от min до max-1.\n\n' +
       'randomSeed(значение) запускает генератор. Без него при каждой перезагрузке будут одинаковые числа. В качестве seed часто используют analogRead(0) — шум с неподключённого пина.\n\n' +
-      'Пример:\n' +
+      'Пример (от 1 до 10):\n' +
       '  void setup() {\n' +
       '    randomSeed(analogRead(0));\n' +
       '  }\n' +
       '  void loop() {\n' +
-      '    int r = random(1, 101);\n' +
+      '    int r = random(1, 11);\n' +
       '    Serial.println(r);\n' +
       '  }\n\n' +
       'Типичная ошибка: забыть randomSeed — тогда числа будут одинаковыми при каждом запуске.',
