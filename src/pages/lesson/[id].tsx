@@ -86,7 +86,7 @@ const LessonPage = () => {
     return (
       <div className="lesson-container">
         <h1>Уровень не найден</h1>
-        <Link to="/map">Вернуться на карту</Link>
+        <Link to="/levels">Вернуться к уровням</Link>
       </div>
     );
   }
@@ -232,7 +232,7 @@ const LessonPage = () => {
       return;
     }
 
-    navigate('/map');
+    navigate('/levels');
   };
 
   return (
@@ -262,7 +262,7 @@ const LessonPage = () => {
               📝 Конспект
             </button>
           )}
-          <Link to="/map" className="exit-btn">Выйти на карту</Link>
+          <Link to="/levels" className="exit-btn">Выйти к уровням</Link>
         </div>
       </header>
 
@@ -347,7 +347,7 @@ const LessonPage = () => {
         <FallingScreen
           onDone={() => {
             setIsFalling(false);
-            navigate('/map');
+            navigate('/levels');
           }}
         />
       )}
