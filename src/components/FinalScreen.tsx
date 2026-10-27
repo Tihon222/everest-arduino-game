@@ -17,8 +17,8 @@ const FinalScreen: React.FC<FinalScreenProps> = ({ nickname, avatar, totalScore,
     <div className="final-overlay">
       <div className="final-content">
         <div className="final-crown">👑</div>
-        <h1 className="final-title">ТЫ СТАЛ МАСТЕРОМ!</h1>
-        <p className="final-subtitle">Ты покорил Эверест Arduino и прошёл все уровни.</p>
+        <h1 className="final-title">Ты стал Мастером!</h1>
+        <p className="final-subtitle">Ты прошёл все уровни Arduino Games.</p>
 
         <div className="final-stats">
           <div className="final-avatar">{avatar}</div>

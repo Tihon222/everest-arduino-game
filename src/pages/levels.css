@@ -13,13 +13,15 @@
 .levels-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 25px;
   padding-bottom: 15px;
   border-bottom: 1px solid #21262d;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 15px;
 }
+
+.levels-title-block { display: flex; flex-direction: column; gap: 4px; }
 
 .levels-header h1 {
   font-size: 1.8rem;
@@ -30,15 +32,45 @@
   text-transform: uppercase;
 }
 
-.levels-stats {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  font-size: 14px;
+.levels-subtitle {
+  font-size: 13px;
   color: #8b949e;
   font-family: monospace;
+  margin: 0;
 }
 
+.levels-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ─────────── Фильтры ─────────── */
+.levels-filters {
+  display: flex;
+  gap: 6px;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.filter-btn {
+  background: transparent;
+  color: #8b949e;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover { color: #c9d1d9; }
+.filter-btn.active { background: #238636; color: white; }
+
+/* ─────────── Кнопка выхода ─────────── */
 .logout-btn {
   background: transparent;
   color: #f85149;
@@ -50,10 +82,7 @@
   transition: all 0.2s;
 }
 
-.logout-btn:hover {
-  background: #f85149;
-  color: #fff;
-}
+.logout-btn:hover { background: #f85149; color: #fff; }
 
 /* ─────────── Сетка карточек ─────────── */
 .levels-grid {
@@ -75,6 +104,17 @@
   gap: 10px;
   position: relative;
   overflow: hidden;
+  opacity: 0;
+  animation: card-appear 0.4s ease forwards;
+}
+
+@keyframes card-appear {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.level-card:active:not(.locked) {
+  transform: scale(0.98);
 }
 
 .level-card::before {
@@ -94,31 +134,28 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
-.level-card:hover::before {
-  background: #238636;
-}
+.level-card:hover::before { background: #238636; }
 
-/* Пройденный уровень */
-.level-card.passed::before {
-  background: #238636;
-}
+/* Пройденный */
+.level-card.passed::before { background: #238636; }
+.level-card.passed { border-color: rgba(35, 134, 54, 0.3); }
 
-.level-card.passed {
-  border-color: rgba(35, 134, 54, 0.3);
-}
-
-/* Текущий уровень */
+/* Текущий */
 .level-card.current {
   border-color: #58a6ff;
   background: linear-gradient(145deg, #161b22 0%, #1a2332 100%);
   box-shadow: 0 0 15px rgba(88, 166, 255, 0.15);
+  animation: card-appear 0.4s ease forwards, current-pulse 2.5s ease-in-out infinite;
 }
 
-.level-card.current::before {
-  background: #58a6ff;
+@keyframes current-pulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(88, 166, 255, 0.15); }
+  50% { box-shadow: 0 0 25px rgba(88, 166, 255, 0.4); }
 }
 
-/* Закрытый уровень */
+.level-card.current::before { background: #58a6ff; }
+
+/* Закрытый */
 .level-card.locked {
   opacity: 0.45;
   cursor: not-allowed;
@@ -131,9 +168,7 @@
   border-color: #21262d;
 }
 
-.level-card.locked::before {
-  background: #21262d;
-}
+.level-card.locked::before { background: #21262d; }
 
 /* ─────────── Заголовок карточки ─────────── */
 .card-header {
@@ -143,25 +178,17 @@
 }
 
 .card-number {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   color: #238636;
   font-family: monospace;
   line-height: 1;
 }
 
-.level-card.current .card-number {
-  color: #58a6ff;
-}
+.level-card.current .card-number { color: #58a6ff; }
+.level-card.locked .card-number { color: #6e7681; }
 
-.level-card.locked .card-number {
-  color: #6e7681;
-}
-
-.card-status {
-  font-size: 18px;
-  opacity: 0.8;
-}
+.card-status { font-size: 18px; opacity: 0.8; }
 
 /* ─────────── Название ─────────── */
 .card-title {
@@ -172,9 +199,7 @@
   line-height: 1.3;
 }
 
-.level-card.current .card-title {
-  color: #58a6ff;
-}
+.level-card.current .card-title { color: #58a6ff; }
 
 /* ─────────── Описание ─────────── */
 .card-task {
@@ -189,7 +214,38 @@
   min-height: 34px;
 }
 
-/* ─────────── Игроки на уровне ─────────── */
+/* ─────────── Прогресс-бар ─────────── */
+.card-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-progress-bar {
+  height: 4px;
+  background: #21262d;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.card-progress-fill {
+  height: 100%;
+  background: #238636;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.level-card.current .card-progress-fill { background: #58a6ff; }
+
+.card-progress-text {
+  font-size: 10px;
+  color: #6e7681;
+  font-family: monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ─────────── Игроки ─────────── */
 .card-players {
   display: flex;
   align-items: center;
@@ -201,9 +257,7 @@
   min-height: 30px;
 }
 
-.card-players span {
-  line-height: 1;
-}
+.card-players span { line-height: 1; }
 
 .card-players .empty {
   font-size: 11px;
@@ -220,25 +274,53 @@
   font-family: monospace;
 }
 
-/* ─────────── Адаптив ─────────── */
-@media (max-width: 480px) {
+/* ─────────── МОБИЛЬНЫЙ СВАЙП (≤ 768px) ─────────── */
+@media (max-width: 768px) {
   .levels-page { padding: 12px; }
   .levels-header h1 { font-size: 1.3rem; }
-  .levels-stats { font-size: 11px; gap: 10px; }
-  .levels-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-  .level-card { padding: 12px; gap: 8px; border-radius: 10px; }
+  .levels-subtitle { font-size: 11px; }
+  .levels-actions { width: 100%; justify-content: space-between; }
+  .levels-filters { flex: 1; }
+  .filter-btn { font-size: 11px; padding: 5px 8px; }
+  .logout-btn { font-size: 11px; padding: 5px 10px; }
+
+  /* Свайп-лента на мобилке */
+  .levels-grid {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 12px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .levels-grid::-webkit-scrollbar { height: 6px; }
+  .levels-grid::-webkit-scrollbar-track { background: #161b22; border-radius: 3px; }
+  .levels-grid::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+
+  .level-card {
+    flex: 0 0 200px;
+    scroll-snap-align: start;
+    padding: 12px;
+    gap: 8px;
+    border-radius: 10px;
+  }
+
   .card-number { font-size: 18px; }
   .card-title { font-size: 13px; }
   .card-task { font-size: 11px; min-height: 30px; }
   .card-players { font-size: 14px; padding-top: 8px; }
 }
 
+/* ─────────── Планшеты (≥ 768px) ─────────── */
 @media (min-width: 768px) {
   .levels-page { padding: 30px; }
   .levels-header h1 { font-size: 2.2rem; }
   .levels-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
   .level-card { padding: 20px; gap: 12px; }
-  .card-number { font-size: 26px; }
+  .card-number { font-size: 28px; }
   .card-title { font-size: 17px; }
   .card-task { font-size: 13px; }
 }
@@ -247,7 +329,7 @@
   .levels-page { padding: 40px; }
   .levels-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
   .level-card { padding: 24px; }
-  .card-number { font-size: 30px; }
+  .card-number { font-size: 32px; }
   .card-title { font-size: 18px; }
   .card-task { font-size: 14px; }
 }

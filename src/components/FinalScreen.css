@@ -2,23 +2,25 @@
 .final-overlay {
   position: fixed;
   inset: 0;
-  background-image: url('/images/everest-day.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background: #0d1117;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 3000;
   padding: 20px;
+  overflow-y: auto;
 }
 
+/* Декоративный градиентный фон */
 .final-overlay::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(13, 17, 23, 0.85);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(35, 134, 54, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(88, 166, 255, 0.15) 0%, transparent 40%);
   z-index: 0;
+  pointer-events: none;
 }
 
 .final-content {
@@ -27,11 +29,11 @@
   text-align: center;
   max-width: 500px;
   width: 100%;
-  padding: 40px 30px;
-  background: rgba(13, 17, 23, 0.85);
-  border: 2px solid #d4b106;
+  padding: 35px 25px;
+  background: #161b22;
+  border: 1px solid #238636;
   border-radius: 16px;
-  box-shadow: 0 0 60px rgba(212, 177, 6, 0.4);
+  box-shadow: 0 0 40px rgba(35, 134, 54, 0.3);
   animation: final-appear 0.6s ease;
 }
 
@@ -51,34 +53,36 @@
 }
 
 .final-title {
-  color: #d4b106;
-  font-size: 2rem;
+  color: #238636;
+  font-size: 1.8rem;
   margin: 15px 0 10px;
   letter-spacing: 2px;
-  text-shadow: 0 0 20px rgba(212, 177, 6, 0.6);
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(35, 134, 54, 0.5);
 }
 
 .final-subtitle {
   color: #c9d1d9;
-  font-size: 14px;
-  margin-bottom: 30px;
+  font-size: 13px;
+  margin-bottom: 25px;
   opacity: 0.85;
 }
 
 .final-stats {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.4);
+  gap: 18px;
+  padding: 18px;
+  background: #0d1117;
+  border: 1px solid #21262d;
   border-radius: 12px;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
   text-align: left;
 }
 
 .final-avatar {
-  font-size: 60px;
-  filter: drop-shadow(0 0 10px rgba(212, 177, 6, 0.6));
+  font-size: 55px;
+  filter: drop-shadow(0 0 10px rgba(35, 134, 54, 0.5));
 }
 
 .final-info {
@@ -86,17 +90,17 @@
 }
 
 .final-name {
-  color: #58a6ff;
-  font-size: 20px;
+  color: #238636;
+  font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .final-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 4px;
-  font-size: 14px;
+  margin-bottom: 3px;
+  font-size: 13px;
 }
 
 .final-label {
@@ -104,7 +108,7 @@
 }
 
 .final-value {
-  color: #d4b106;
+  color: #58a6ff;
   font-family: monospace;
   font-weight: bold;
 }
@@ -115,24 +119,36 @@
   background: #238636;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s;
 }
 
 .final-btn:hover {
   background: #2ea043;
   box-shadow: 0 0 20px rgba(46, 160, 67, 0.5);
+  transform: translateY(-1px);
 }
 
-@media (max-width: 768px) {
-  .final-content { padding: 25px 20px; }
+/* ─────────── Адаптив ─────────── */
+@media (max-width: 480px) {
+  .final-content { padding: 25px 18px; }
   .final-title { font-size: 1.4rem; }
   .final-crown { font-size: 45px; }
-  .final-stats { padding: 15px; gap: 12px; }
+  .final-stats { padding: 14px; gap: 12px; }
   .final-avatar { font-size: 45px; }
   .final-name { font-size: 16px; }
   .final-row { font-size: 12px; }
+}
+
+@media (min-width: 768px) {
+  .final-content { padding: 40px 30px; }
+  .final-title { font-size: 2rem; }
+  .final-crown { font-size: 70px; }
+  .final-avatar { font-size: 65px; }
+  .final-name { font-size: 20px; }
+  .final-row { font-size: 14px; }
+  .final-btn { font-size: 17px; padding: 16px; }
 }
