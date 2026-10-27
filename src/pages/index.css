@@ -1,23 +1,28 @@
 /* src/pages/index.css */
+
+/* ─────────── Общий контейнер ─────────── */
 .home-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
-  background-image: url('/images/everest-day.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background: #0d1117;
+  color: #c9d1d9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   padding: 15px;
+  overflow: hidden;
 }
 
+/* Декоративный градиентный фон (вместо горы) */
 .home-container::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(13, 17, 23, 0.8);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(35, 134, 54, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(88, 166, 255, 0.1) 0%, transparent 40%);
   z-index: 0;
+  pointer-events: none;
 }
 
 .home-container > * {
@@ -25,34 +30,37 @@
   z-index: 1;
 }
 
+/* ─────────── Кнопки входа ─────────── */
 .auth-links {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 15px;
+  right: 15px;
   z-index: 10;
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .auth-btn {
-  font-size: 11px;
-  padding: 5px 10px;
-  border: 1px solid #30363d;
+  font-size: 12px;
+  padding: 6px 14px;
+  border: 1px solid #238636;
   border-radius: 6px;
-  background: rgba(22, 27, 34, 0.9);
-  color: #c9d1d9;
+  background: transparent;
+  color: #238636;
   text-decoration: none;
+  cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
 }
 
 .auth-btn:hover {
-  background: #1f6feb;
-  border-color: #1f6feb;
+  background: #238636;
   color: #fff;
+  box-shadow: 0 0 15px rgba(35, 134, 54, 0.4);
 }
 
+/* ─────────── Основной контент ─────────── */
 .main-content {
   flex: 1;
   display: flex;
@@ -67,43 +75,61 @@
 }
 
 .main-content h1 {
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-  color: #d4b106;
-  text-shadow: 0 2px 20px rgba(212, 177, 6, 0.4);
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 2.5rem;
+  color: #238636;
+  margin: 0 0 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 0 30px rgba(35, 134, 54, 0.4);
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #8b949e;
+  margin-bottom: 30px;
+  font-family: monospace;
 }
 
 .description {
-  font-size: 0.95rem;
-  margin-bottom: 1.2rem;
+  font-size: 1rem;
+  margin-bottom: 30px;
   color: #c9d1d9;
-  line-height: 1.6;
+  line-height: 1.7;
+  max-width: 600px;
 }
 
-.description p { margin-bottom: 0.7rem; }
-.description strong { color: #d4b106; }
+.description p {
+  margin-bottom: 12px;
+}
 
+.description strong {
+  color: #238636;
+}
+
+/* ─────────── Кнопка старта ─────────── */
 .start-btn {
-  background-color: #238636;
+  background: #238636;
   color: white;
-  font-size: 1rem;
-  padding: 12px 28px;
+  font-size: 1.05rem;
+  padding: 14px 36px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
-  width: 100%;
-  max-width: 280px;
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 0 4px 15px rgba(35, 134, 54, 0.3);
 }
 
 .start-btn:hover {
-  background-color: #2ea043;
+  background: #2ea043;
   box-shadow: 0 0 25px rgba(46, 160, 67, 0.5);
+  transform: translateY(-2px);
 }
 
+/* ─────────── Модалка ─────────── */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -112,12 +138,12 @@
   justify-content: center;
   align-items: center;
   z-index: 100;
-  padding: 10px;
+  padding: 15px;
 }
 
 .modal-content {
   background: #161b22;
-  padding: 20px;
+  padding: 25px;
   border-radius: 12px;
   border: 1px solid #30363d;
   max-width: 600px;
@@ -129,77 +155,71 @@
 }
 
 .modal-content h2 {
-  color: #d4b106;
-  font-size: 1.2rem;
+  color: #238636;
+  font-size: 1.3rem;
   margin-bottom: 15px;
 }
 
 .modal-content p {
   color: #c9d1d9;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
+  margin-bottom: 12px;
 }
 
 .code-block {
   background: #0d1117;
-  padding: 12px;
+  padding: 15px;
   border-radius: 8px;
   border: 1px solid #21262d;
-  font-family: 'Fira Code', monospace;
-  font-size: 11px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
   color: #79c0ff;
   margin: 15px 0;
   overflow-x: auto;
   white-space: pre;
+  line-height: 1.6;
 }
 
 .continue-btn {
   width: 100%;
-  margin-top: 20px;
-  background-color: #1f6feb;
+  margin-top: 15px;
+  background: #238636;
   color: white;
-  padding: 10px;
+  padding: 12px;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .continue-btn:hover {
-  background-color: #2a7fef;
-  box-shadow: 0 0 20px rgba(31, 111, 235, 0.4);
+  background: #2ea043;
+  box-shadow: 0 0 20px rgba(46, 160, 67, 0.4);
 }
 
-/* ─────────── Телефоны (480px+) ─────────── */
+/* ─────────── Адаптив ─────────── */
 @media (min-width: 480px) {
-  .home-container { padding: 20px; }
-  .auth-links { top: 15px; right: 15px; gap: 8px; }
-  .auth-btn { font-size: 12px; padding: 6px 12px; }
-  .main-content h1 { font-size: 2.2rem; }
-  .description { font-size: 1rem; }
-  .start-btn { font-size: 1.05rem; padding: 13px 32px; }
-  .modal-content { padding: 25px; }
-  .modal-content h2 { font-size: 1.3rem; }
-  .modal-content p { font-size: 14px; }
-  .code-block { font-size: 12px; padding: 15px; }
-  .continue-btn { font-size: 15px; padding: 12px; }
-}
-
-/* ─────────── Планшеты (768px+) ─────────── */
-@media (min-width: 768px) {
   .home-container { padding: 20px; }
   .auth-links { top: 20px; right: 20px; gap: 10px; }
   .auth-btn { font-size: 13px; padding: 8px 16px; }
-  .main-content h1 { font-size: 3rem; margin-bottom: 2rem; }
-  .description { font-size: 1.1rem; margin-bottom: 2rem; }
-  .start-btn { font-size: 1.1rem; padding: 14px 36px; max-width: 320px; }
+  .main-content h1 { font-size: 3rem; }
+  .subtitle { font-size: 1.1rem; }
+  .description { font-size: 1.05rem; }
+  .start-btn { font-size: 1.1rem; padding: 16px 40px; }
   .modal-content { padding: 30px; }
 }
 
-/* ─────────── Большие мониторы (1440px+) ─────────── */
-@media (min-width: 1440px) {
+@media (min-width: 768px) {
   .main-content h1 { font-size: 3.5rem; }
-  .description { font-size: 1.2rem; }
+  .subtitle { font-size: 1.2rem; }
+  .description { font-size: 1.1rem; }
+  .start-btn { font-size: 1.2rem; padding: 18px 48px; }
+}
+
+@media (min-width: 1440px) {
+  .main-content h1 { font-size: 4rem; }
+  .description { font-size: 1.2rem; max-width: 700px; }
 }

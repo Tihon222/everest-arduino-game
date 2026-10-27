@@ -188,7 +188,6 @@ const LessonPage = () => {
       return;
     }
 
-    // Защита от уровня 31
     const nextLevel = Math.min(levelId + 1, LEVELS.length);
 
     let savedProgress: any = null;
@@ -262,7 +261,7 @@ const LessonPage = () => {
               📝 Конспект
             </button>
           )}
-          <Link to="/levels" className="exit-btn">Выйти к уровням</Link>
+          <Link to="/levels" className="exit-btn">🚪 Выйти</Link>
         </div>
       </header>
 
