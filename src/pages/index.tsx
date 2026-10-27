@@ -32,10 +32,6 @@ const Home = () => {
             Готов ли ты начать восхождение?
           </p>
         </div>
-
-        <button className="start-btn" onClick={() => setShowIntro(true)}>
-          Начать восхождение
-        </button>
       </div>
 
       {/* Модальное окно с синтаксисом */}
