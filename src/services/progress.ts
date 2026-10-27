@@ -9,6 +9,7 @@ export interface UserProgress {
   level: number;
   total_score: number;
   attempts: Record<number, number>;
+  achievements?: string[];
   rest_until?: string | null;
   is_falling?: boolean;
 }
@@ -26,7 +27,6 @@ export const getProgress = async (uid: string): Promise<UserProgress | null> => 
 };
 
 export const saveProgress = async (uid: string, data: Partial<UserProgress>) => {
-  // Защита от уровня > 30
   if (typeof data.level === 'number') {
     data.level = Math.min(data.level, MAX_LEVEL);
   }
@@ -68,7 +68,6 @@ export const startRest = async (uid: string, seconds: number = 10) => {
     .update({
       rest_until: restUntil,
       is_falling: true,
-      // Уровень сбрасываем только если он выше 10
       level: 10,
       updated_at: new Date().toISOString(),
     })
@@ -84,4 +83,60 @@ export const endRest = async (uid: string) => {
       updated_at: new Date().toISOString(),
     })
     .eq('id', uid);
+};
+
+// Экспорт прогресса в JSON
+export const exportProgress = async (uid: string) => {
+  const progress = await getProgress(uid);
+  if (!progress) return null;
+
+  const data = {
+    exportedAt: new Date().toISOString(),
+    version: '1.0',
+    progress: {
+      level: progress.level,
+      total_score: progress.total_score,
+      attempts: progress.attempts,
+      nickname: progress.nickname,
+      avatar: progress.avatar,
+      achievements: progress.achievements || [],
+    },
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `arduino-games-progress-${Date.now()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  return data;
+};
+
+// ─────────── Достижения ───────────
+export const ACHIEVEMENTS = {
+  first_step: { icon: '🚀', title: 'Первый шаг', desc: 'Пройди 1-й уровень' },
+  speedster: { icon: '⚡', title: 'Скоростной', desc: 'Пройди уровень с первой попытки' },
+  sniper: { icon: '🎯', title: 'Точный', desc: 'Пройди 5 уровней подряд без ошибок' },
+  master: { icon: '🏆', title: 'Мастер', desc: 'Пройди 30-й уровень' },
+  resilient: { icon: '🔥', title: 'Несгибаемый', desc: 'Пройди уровень после падения' },
+};
+
+export const unlockAchievement = async (uid: string, achievementKey: string) => {
+  const progress = await getProgress(uid);
+  if (!progress) return;
+
+  const current = progress.achievements || [];
+  if (current.includes(achievementKey)) return;
+
+  const updated = [...current, achievementKey];
+  await saveProgress(uid, { achievements: updated });
+};
+
+export const getUserAchievements = async (uid: string) => {
+  const progress = await getProgress(uid);
+  return progress?.achievements || [];
 };
