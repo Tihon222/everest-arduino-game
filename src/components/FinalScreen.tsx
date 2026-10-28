@@ -30,7 +30,7 @@ const FinalScreen: React.FC<FinalScreenProps> = ({ nickname, avatar, totalScore,
             </div>
             <div className="final-row">
               <span className="final-label">Уровни:</span>
-              <span className="final-value">{totalLevels} / 30</span>
+              <span className="final-value">{totalLevels} / {totalLevels}</span>
             </div>
           </div>
         </div>
