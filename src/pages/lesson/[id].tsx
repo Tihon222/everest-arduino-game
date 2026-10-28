@@ -221,7 +221,8 @@ const LessonPage = () => {
 
     if (timerRef.current) clearInterval(timerRef.current);
 
-    if (levelId === 30) {
+    // ⬇️ ИЗМЕНЕНИЕ: финальный экран на 50-м уровне
+    if (levelId === 50) {
       setFinalData({
         nickname: savedProgress?.nickname || user?.email?.split('@')[0] || 'Игрок',
         avatar: savedProgress?.avatar || '🧗',
@@ -356,7 +357,7 @@ const LessonPage = () => {
           nickname={finalData.nickname}
           avatar={finalData.avatar}
           totalScore={finalData.totalScore}
-          totalLevels={30}
+          totalLevels={50}
         />
       )}
     </div>

@@ -21,12 +21,10 @@ const LevelsPage = () => {
   const [filter, setFilter] = useState<Filter>('all');
   const [achievements, setAchievements] = useState<string[]>([]);
 
-  // Модалка: игроки на уровне
   const [showPlayersModal, setShowPlayersModal] = useState(false);
   const [modalLevel, setModalLevel] = useState<number | null>(null);
   const [modalPlayers, setModalPlayers] = useState<any[]>([]);
 
-  // Панель рейтинга
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   useEffect(() => {
@@ -90,7 +88,8 @@ const LevelsPage = () => {
       <header className="levels-header">
         <div className="levels-title-block">
           <h1>Уровни</h1>
-          <p className="levels-subtitle">Твой прогресс: {myLevel} / 30</p>
+          {/* ⬇️ Изменено: / 30 → / 50 */}
+          <p className="levels-subtitle">Твой прогресс: {myLevel} / 50</p>
         </div>
         <div className="levels-actions">
           <div className="levels-filters">
