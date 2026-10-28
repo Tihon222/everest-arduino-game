@@ -221,7 +221,6 @@ const LessonPage = () => {
 
     if (timerRef.current) clearInterval(timerRef.current);
 
-    // ⬇️ ИЗМЕНЕНИЕ: финальный экран на 50-м уровне
     if (levelId === 50) {
       setFinalData({
         nickname: savedProgress?.nickname || user?.email?.split('@')[0] || 'Игрок',
@@ -232,7 +231,9 @@ const LessonPage = () => {
       return;
     }
 
+    // Переход на уровни + перезагрузка для свежих данных
     navigate('/levels');
+    window.location.reload();
   };
 
   return (
@@ -348,6 +349,7 @@ const LessonPage = () => {
           onDone={() => {
             setIsFalling(false);
             navigate('/levels');
+            window.location.reload();
           }}
         />
       )}
