@@ -1,0 +1,185 @@
+/* src/pages/profile.css */
+.profile-page {
+  min-height: 100vh;
+  background: #0d1117;
+  color: #c9d1d9;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #21262d;
+}
+
+.profile-header h1 {
+  color: #238636;
+  font-size: 1.6rem;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.back-btn {
+  color: #58a6ff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.back-btn:hover { text-decoration: underline; }
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.profile-avatar {
+  font-size: 60px;
+  filter: drop-shadow(0 0 10px rgba(35, 134, 54, 0.5));
+}
+
+.profile-info h2 {
+  margin: 0 0 5px;
+  color: #238636;
+  font-size: 1.4rem;
+}
+
+.profile-info p {
+  margin: 0;
+  color: #8b949e;
+  font-size: 13px;
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 10px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: bold;
+  color: #58a6ff;
+  font-family: monospace;
+}
+
+.profile-achievements {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.profile-achievements h3 {
+  color: #238636;
+  margin: 0 0 15px;
+  font-size: 1.1rem;
+}
+
+.achievements-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  border: 1px solid #21262d;
+  background: #0d1117;
+}
+
+.achievement-item.unlocked {
+  border-color: #238636;
+  background: rgba(35, 134, 54, 0.15);
+  color: #7ee787;
+}
+
+.achievement-item.locked {
+  opacity: 0.4;
+  color: #6e7681;
+}
+
+.ach-icon { font-size: 16px; }
+.ach-title { font-weight: 600; }
+
+.profile-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.reset-btn,
+.logout-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.reset-btn {
+  background: #d4b106;
+  color: #0d1117;
+}
+
+.reset-btn:hover { background: #e5c100; }
+
+.logout-btn {
+  background: transparent;
+  color: #f85149;
+  border: 1px solid #f85149;
+}
+
+.logout-btn:hover { background: #f85149; color: #fff; }
+
+.loading {
+  text-align: center;
+  color: #8b949e;
+  margin-top: 40px;
+}
+
+@media (max-width: 480px) {
+  .profile-page { padding: 12px; }
+  .profile-header h1 { font-size: 1.2rem; }
+  .profile-avatar { font-size: 45px; }
+  .profile-info h2 { font-size: 1.1rem; }
+  .stat-value { font-size: 18px; }
+  .achievements-grid { gap: 6px; }
+  .achievement-item { font-size: 11px; padding: 4px 8px; }
+}

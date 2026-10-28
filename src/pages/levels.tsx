@@ -5,7 +5,6 @@ import { LEVELS } from '../data/levels';
 import { useAuth } from '../context/AuthContext';
 import {
   getLeaderboard,
-  exportProgress,
   ACHIEVEMENTS,
   getUserAchievements,
 } from '../services/progress';
@@ -77,18 +76,11 @@ const LevelsPage = () => {
     navigate(`/lesson/${levelId}`);
   };
 
-  const handleExport = async () => {
-    if (!user) return;
-    const data = await exportProgress(user.id);
-    if (!data) alert('Не удалось экспортировать прогресс');
-  };
-
   return (
     <div className="levels-page">
       <header className="levels-header">
         <div className="levels-title-block">
           <h1>Уровни</h1>
-          {/* ⬇️ Изменено: / 30 → / 50 */}
           <p className="levels-subtitle">Твой прогресс: {myLevel} / 50</p>
         </div>
         <div className="levels-actions">
@@ -115,8 +107,8 @@ const LevelsPage = () => {
           <button className="logout-btn" onClick={() => setShowLeaderboard(true)}>
             🏆 Рейтинг
           </button>
-          <button className="logout-btn" onClick={handleExport}>
-            Экспорт
+          <button className="logout-btn" onClick={() => navigate('/profile')}>
+            👤 Профиль
           </button>
           <button className="logout-btn" onClick={() => navigate('/')}>
             Выйти
