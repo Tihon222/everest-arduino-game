@@ -1,6 +1,6 @@
 // src/pages/levels.tsx
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom'; // ← добавлен useLocation
 import { LEVELS } from '../data/levels';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -14,6 +14,7 @@ type Filter = 'all' | 'passed' | 'current';
 
 const LevelsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // ← отслеживаем переходы
   const { user } = useAuth();
   const [players, setPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +27,7 @@ const LevelsPage = () => {
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
+  // ⬇️ Загружаем данные при КАЖДОМ переходе на эту страницу
   useEffect(() => {
     const load = async () => {
       try {
@@ -38,7 +40,7 @@ const LevelsPage = () => {
       }
     };
     load();
-  }, []);
+  }, [location.key]); // ← location.key меняется при каждом переходе
 
   useEffect(() => {
     const loadAchievements = async () => {
@@ -116,7 +118,6 @@ const LevelsPage = () => {
         </div>
       </header>
 
-      {/* Достижения */}
       <div className="achievements-bar">
         {Object.entries(ACHIEVEMENTS).map(([key, ach]) => {
           const unlocked = achievements.includes(key);
@@ -199,7 +200,6 @@ const LevelsPage = () => {
         <p className="loading">Нет уровней с таким фильтром.</p>
       )}
 
-      {/* Модалка: игроки на уровне */}
       {showPlayersModal && modalLevel !== null && (
         <div className="modal-overlay" onClick={() => setShowPlayersModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -225,7 +225,6 @@ const LevelsPage = () => {
         </div>
       )}
 
-      {/* Панель рейтинга */}
       {showLeaderboard && (
         <div className="modal-overlay" onClick={() => setShowLeaderboard(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
