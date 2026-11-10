@@ -5,507 +5,135 @@ export interface Level {
   x: number;
   y: number;
   task: string;
-  type: 'write' | 'fix';
+  type: 'write' | 'fix' | 'quiz';
   buggyCode?: string;
   starterCode?: string;
   timeLimit?: number;
   fallbackLevel?: number;
-  reference?: string;
   checks: { pattern: RegExp; message: string }[];
+  options?: string[];
+  correctOption?: number;
 }
-
-// Универсальные проверки структуры (для write-уровней 1-10, 16-50)
-const STRUCTURE_CHECKS = (levelId: number) => {
-  const checks = [
-    { pattern: /void\s+setup\s*\(\s*\)\s*\{/, message: 'Нужна функция void setup() { ... }' },
-    { pattern: /void\s+loop\s*\(\s*\)\s*\{/, message: 'Нужна функция void loop() { ... }' },
-  ];
-  // Для уровней, где нужны переменные в начале
-  if ([1, 4, 5, 16, 17, 18, 21, 22, 23, 24, 25, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50].includes(levelId)) {
-    checks.push({ pattern: /(int|const int|byte|bool|unsigned long|float)\s+\w+\s*=/, message: 'В начале кода должна быть объявлена переменная (int, const int, byte и т.д.)' });
-  }
-  return checks;
-};
 
 export const LEVELS: Level[] = [
   // ═══ ЭТАП 1: ОСНОВЫ (1–10) ═══
-  { id: 1, title: 'Подножие', x: 8, y: 92, type: 'write',
-    task: 'Объяви целочисленную переменную в начале кода и присвой ей значение. В setup() выведи её в порт.',
-    starterCode: '// Объяви переменную здесь\n\nvoid setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(1),
-      { pattern: /Serial\s*\.\s*println\s*\(\s*\w+\s*\)\s*;/, message: 'В setup() нужен Serial.println(имяПеременной);' }
-    ] },
+  { id: 1, title: 'Подножие', x: 8, y: 92, type: 'write', task: 'Объяви целочисленную переменную в начале кода и присвой ей значение. В setup() выведи её в порт.', starterCode: 'int x = 10;\n\nvoid setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}', checks: [{ pattern: /Serial\s*\.\s*println\s*\(\s*\w+\s*\)\s*;/, message: 'В setup() нужен Serial.println(имяПеременной);' }] },
+  { id: 2, title: 'Базовый лагерь', x: 16, y: 91, type: 'write', task: 'Инициализируй последовательный порт в setup(). Используй стандартную скорость 9600.', starterCode: 'void setup() {\n  // Твой код\n}\n\nvoid loop() {\n}', checks: [{ pattern: /Serial\s*\.\s*begin\s*\(\s*9600\s*\)\s*;/, message: 'В setup() нужен Serial.begin(9600);' }] },
+  { id: 3, title: 'Первый вывод', x: 24, y: 90, type: 'write', task: 'В setup() выведи любое текстовое сообщение в последовательный порт с переводом строки.', starterCode: 'void setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}', checks: [{ pattern: /Serial\s*\.\s*println\s*\(\s*"[^"]+"\s*\)\s*;/, message: 'В setup() нужен Serial.println("текст");' }] },
+  { id: 4, title: 'Лагерь 1', x: 32, y: 90, type: 'write', task: 'Объяви две целочисленные переменные с разными значениями в начале кода.', starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}', checks: [{ pattern: /int\s+\w+\s*=\s*\d+[\s\S]*int\s+\w+\s*=\s*\d+/, message: 'Нужны две переменные типа int' }] },
+  { id: 5, title: 'Сумма', x: 40, y: 90, type: 'write', task: 'В setup() сложи две переменные и выведи результат в порт.', starterCode: 'int a = 5;\nint b = 10;\n\nvoid setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}', checks: [{ pattern: /Serial\s*\.\s*println\s*\(\s*\w+\s*\+\s*\w+\s*\)\s*;/, message: 'В setup() сложи две переменные внутри Serial.println()' }] },
+  { id: 6, title: 'Ледник', x: 48, y: 90, type: 'write', task: 'В setup() проверь, больше ли значение переменной 10. Если да — выведи "больше".', starterCode: 'int x = 15;\n\nvoid setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}', checks: [{ pattern: /if\s*\(\s*\w+\s*>\s*10\s*\)\s*\{/, message: 'В setup() нужно if (переменная > 10)' }, { pattern: /Serial\s*\.\s*println/, message: 'В setup() выведи результат' }] },
+  { id: 7, title: 'Развилка', x: 56, y: 90, type: 'write', task: 'В setup() добавь альтернативную ветку: если условие ложно — выведи "меньше".', starterCode: 'int x = 5;\n\nvoid setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}', checks: [{ pattern: /if\s*\(/, message: 'В setup() нужен if' }, { pattern: /else/, message: 'В setup() нужен else' }, { pattern: /Serial\s*\.\s*println[\s\S]*Serial\s*\.\s*println/, message: 'Нужны два вывода: в if и в else' }] },
+  { id: 8, title: 'Цикл for', x: 64, y: 90, type: 'write', task: 'В setup() создай цикл, который выполнится ровно 5 раз.', starterCode: 'void setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}', checks: [{ pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*5\s*;/, message: 'В setup() нужен for с началом 0 и условием < 5' }] },
+  { id: 9, title: 'Цикл while', x: 72, y: 90, type: 'write', task: 'В setup() создай цикл, который работает, пока счётчик меньше 3. Не забудь увеличивать счётчик.', starterCode: 'void setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}', checks: [{ pattern: /while\s*\(\s*\w+\s*<\s*3\s*\)/, message: 'В setup() нужен while (counter < 3)' }, { pattern: /\w+\s*\+\+/, message: 'Увеличивай счётчик: counter++' }] },
+  { id: 10, title: 'Вложенный цикл', x: 85, y: 85, type: 'write', task: 'В setup() сделай два цикла, один внутри другого.', starterCode: 'void setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}', checks: [{ pattern: /for[\s\S]*for/, message: 'В setup() нужны два цикла for' }] },
 
-  { id: 2, title: 'Базовый лагерь', x: 16, y: 91, type: 'write',
-    task: 'Инициализируй последовательный порт в setup(). Используй стандартную скорость 9600.',
-    starterCode: 'void setup() {\n  // Твой код\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(2),
-      { pattern: /Serial\s*\.\s*begin\s*\(\s*9600\s*\)\s*;/, message: 'В setup() нужен Serial.begin(9600);' }
-    ] },
-
-  { id: 3, title: 'Первый вывод', x: 24, y: 90, type: 'write',
-    task: 'В setup() выведи любое текстовое сообщение в последовательный порт с переводом строки.',
-    starterCode: 'void setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(3),
-      { pattern: /Serial\s*\.\s*println\s*\(\s*"[^"]+"\s*\)\s*;/, message: 'В setup() нужен Serial.println("текст");' }
-    ] },
-
-  { id: 4, title: 'Лагерь 1', x: 32, y: 90, type: 'write',
-    task: 'Объяви две целочисленные переменные с разными значениями в начале кода.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(4),
-      { pattern: /int\s+\w+\s*=\s*\d+[\s\S]*int\s+\w+\s*=\s*\d+/, message: 'Нужны две переменные типа int' }
-    ] },
-
-  { id: 5, title: 'Сумма', x: 40, y: 90, type: 'write',
-    task: 'В setup() сложи две переменные и выведи результат в порт.',
-    starterCode: 'int a = 5;\nint b = 10;\n\nvoid setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(5),
-      { pattern: /Serial\s*\.\s*println\s*\(\s*\w+\s*\+\s*\w+\s*\)\s*;/, message: 'В setup() сложи две переменные внутри Serial.println()' }
-    ] },
-
-  { id: 6, title: 'Ледник', x: 48, y: 90, type: 'write',
-    task: 'В setup() проверь, больше ли значение переменной 10. Если да — выведи "больше".',
-    starterCode: 'int x = 15;\n\nvoid setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(6),
-      { pattern: /if\s*\(\s*\w+\s*>\s*10\s*\)\s*\{/, message: 'В setup() нужно if (переменная > 10)' },
-      { pattern: /Serial\s*\.\s*println/, message: 'В setup() выведи результат' }
-    ] },
-
-  { id: 7, title: 'Развилка', x: 56, y: 90, type: 'write',
-    task: 'В setup() добавь альтернативную ветку: если условие ложно — выведи "меньше".',
-    starterCode: 'int x = 5;\n\nvoid setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(7),
-      { pattern: /if\s*\(/, message: 'В setup() нужен if' },
-      { pattern: /else/, message: 'В setup() нужен else' },
-      { pattern: /Serial\s*\.\s*println[\s\S]*Serial\s*\.\s*println/, message: 'Нужны два вывода: в if и в else' }
-    ] },
-
-  { id: 8, title: 'Цикл for', x: 64, y: 90, type: 'write',
-    task: 'В setup() создай цикл, который выполнится ровно 5 раз.',
-    starterCode: 'void setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(8),
-      { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*5\s*;/, message: 'В setup() нужен for с началом 0 и условием < 5' }
-    ] },
-
-  { id: 9, title: 'Цикл while', x: 72, y: 90, type: 'write',
-    task: 'В setup() создай цикл, который работает, пока счётчик меньше 3. Не забудь увеличивать счётчик.',
-    starterCode: 'void setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(9),
-      { pattern: /while\s*\(\s*\w+\s*<\s*3\s*\)/, message: 'В setup() нужен while (counter < 3)' },
-      { pattern: /\w+\s*\+\+/, message: 'Увеличивай счётчик: counter++' }
-    ] },
-
-  { id: 10, title: 'Вложенный цикл', x: 85, y: 85, type: 'write',
-    task: 'В setup() сделай два цикла, один внутри другого.',
-    starterCode: 'void setup() {\n  Serial.begin(9600);\n  // Твой код\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(10),
-      { pattern: /for[\s\S]*for/, message: 'В setup() нужны два цикла for' }
-    ] },
-
-  // ═══ ЭТАП 2: ОБРЫВ (11–15) — таймер и исправление ошибок ═══
-  { id: 11, title: 'Обрыв 1', x: 74, y: 78, type: 'fix',
-    timeLimit: 30, fallbackLevel: 10,
-    task: '⚠ НАЙДИ ОШИБКУ ЗА 30 СЕКУНД!\n\nПрограмма должна открыть порт. Но что-то не так.',
-    buggyCode: 'void setup() {\n  Serial.begin(9600)\n}\n\nvoid loop() {\n}',
-    checks: [
-      { pattern: /void\s+setup\s*\(\s*\)\s*\{/, message: 'Нужна функция void setup() { ... }' },
-      { pattern: /void\s+loop\s*\(\s*\)\s*\{/, message: 'Нужна функция void loop() { ... }' },
-      { pattern: /Serial\s*\.\s*begin\s*\(\s*9600\s*\)\s*;/, message: 'Пропущена ; после Serial.begin(9600)' }
-    ] },
-
-  { id: 12, title: 'Обрыв 2', x: 65, y: 75, type: 'fix',
-    timeLimit: 45, fallbackLevel: 10,
-    task: '⚠ НАЙДИ ОШИБКУ ЗА 45 СЕКУНД!\n\nПрограмма должна вывести значение. Но что-то не так.',
-    buggyCode: 'void setup() {\n  Serial.begin(9600);\n  Serial.println(x);\n}\n\nvoid loop() {\n}',
-    checks: [
-      { pattern: /void\s+setup\s*\(\s*\)\s*\{/, message: 'Нужна функция void setup() { ... }' },
-      { pattern: /void\s+loop\s*\(\s*\)\s*\{/, message: 'Нужна функция void loop() { ... }' },
-      { pattern: /int\s+\w+/, message: 'Переменная не объявлена' },
-      { pattern: /Serial\s*\.\s*println\s*\(\s*\w+\s*\)\s*;/, message: 'Нужен Serial.println()' }
-    ] },
-
-  { id: 13, title: 'Обрыв 3', x: 55, y: 72, type: 'fix',
-    timeLimit: 60, fallbackLevel: 10,
-    task: '⚠ НАЙДИ ОШИБКУ ЗА 60 СЕКУНД!\n\nПрограмма должна выводить "OK", если value > threshold. Но что-то не так.',
-    buggyCode: 'int value = 10;\nint threshold = 5;\nvoid setup() {\n  Serial.begin(9600);\n  if (value < threshold) {\n    Serial.println("OK");\n  } else {\n    Serial.println("FAIL");\n  }\n}\nvoid loop() {\n}',
-    checks: [
-      { pattern: /void\s+setup\s*\(\s*\)\s*\{/, message: 'Нужна функция void setup() { ... }' },
-      { pattern: /void\s+loop\s*\(\s*\)\s*\{/, message: 'Нужна функция void loop() { ... }' },
-      { pattern: /if\s*\(\s*value\s*>\s*threshold\s*\)/, message: 'Условие должно быть value > threshold' }
-    ] },
-
-  { id: 14, title: 'Обрыв 4', x: 45, y: 69, type: 'fix',
-    timeLimit: 60, fallbackLevel: 10,
-    task: '⚠ НАЙДИ ОШИБКУ ЗА 60 СЕКУНД!\n\nСчётчик должен вывести числа от 0 до 4. Но что-то не так.',
-    buggyCode: 'void setup() {\n  Serial.begin(9600);\n  int counter = 0;\n  int maxValue = 5;\n  for (int i = 0; i > maxValue; i++) {\n    Serial.println(i);\n  }\n}\nvoid loop() {\n}',
-    checks: [
-      { pattern: /void\s+setup\s*\(\s*\)\s*\{/, message: 'Нужна функция void setup() { ... }' },
-      { pattern: /void\s+loop\s*\(\s*\)\s*\{/, message: 'Нужна функция void loop() { ... }' },
-      { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*\w+\s*;/, message: 'Условие цикла должно быть i < maxValue' }
-    ] },
-
-  { id: 15, title: 'Обрыв 5', x: 35, y: 66, type: 'fix',
-    timeLimit: 90, fallbackLevel: 10,
-    task: '⚠ НАЙДИ ОШИБКУ ЗА 90 СЕКУНД!\n\nПрограмма должна вывести приветствие дважды. Но что-то не так.',
-    buggyCode: 'void sayHello() {\n  Serial.println("Hello");\n}\nvoid setup() {\n  Serial.begin(9600);\n  sayHello();\n  sayHello;\n}\nvoid loop() {\n}',
-    checks: [
-      { pattern: /void\s+setup\s*\(\s*\)\s*\{/, message: 'Нужна функция void setup() { ... }' },
-      { pattern: /void\s+loop\s*\(\s*\)\s*\{/, message: 'Нужна функция void loop() { ... }' },
-      { pattern: /sayHello\s*\(\s*\)\s*;[\s\S]*sayHello\s*\(\s*\)\s*;/, message: 'Функция должна вызываться дважды со скобками' }
-    ] },
+  // ═══ ЭТАП 2: ОБРЫВ (11–15) ═══
+  { id: 11, title: 'Обрыв 1', x: 74, y: 78, type: 'fix', timeLimit: 30, fallbackLevel: 10, task: '⚠ НАЙДИ ОШИБКУ ЗА 30 СЕКУНД!\n\nПрограмма должна открыть порт. Но что-то не так.', buggyCode: 'void setup() {\n  Serial.begin(9600)\n}\n\nvoid loop() {\n}', checks: [{ pattern: /Serial\s*\.\s*begin\s*\(\s*9600\s*\)\s*;/, message: 'Пропущена ;' }] },
+  { id: 12, title: 'Обрыв 2', x: 65, y: 75, type: 'fix', timeLimit: 45, fallbackLevel: 10, task: '⚠ НАЙДИ ОШИБКУ ЗА 45 СЕКУНД!\n\nПрограмма должна вывести значение. Но что-то не так.', buggyCode: 'void setup() {\n  Serial.begin(9600);\n  Serial.println(x);\n}\n\nvoid loop() {\n}', checks: [{ pattern: /int\s+\w+/, message: 'Переменная не объявлена' }, { pattern: /Serial\s*\.\s*println/, message: 'Нужен Serial.println()' }] },
+  { id: 13, title: 'Обрыв 3', x: 55, y: 72, type: 'fix', timeLimit: 60, fallbackLevel: 10, task: '⚠ НАЙДИ ОШИБКУ ЗА 60 СЕКУНД!\n\nПрограмма должна выводить "OK", если value > threshold.', buggyCode: 'int value = 10;\nint threshold = 5;\nvoid setup() {\n  Serial.begin(9600);\n  if (value < threshold) {\n    Serial.println("OK");\n  } else {\n    Serial.println("FAIL");\n  }\n}\nvoid loop() {\n}', checks: [{ pattern: /if\s*\(\s*value\s*>\s*threshold\s*\)/, message: 'Условие должно быть value > threshold' }] },
+  { id: 14, title: 'Обрыв 4', x: 45, y: 69, type: 'fix', timeLimit: 60, fallbackLevel: 10, task: '⚠ НАЙДИ ОШИБКУ ЗА 60 СЕКУНД!\n\nСчётчик должен вывести числа от 0 до 4.', buggyCode: 'void setup() {\n  Serial.begin(9600);\n  int counter = 0;\n  int maxValue = 5;\n  for (int i = 0; i > maxValue; i++) {\n    Serial.println(i);\n  }\n}\nvoid loop() {\n}', checks: [{ pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*\w+\s*;/, message: 'Условие должно быть i < maxValue' }] },
+  { id: 15, title: 'Обрыв 5', x: 35, y: 66, type: 'fix', timeLimit: 90, fallbackLevel: 10, task: '⚠ НАЙДИ ОШИБКУ ЗА 90 СЕКУНД!\n\nПрограмма должна вывести приветствие дважды.', buggyCode: 'void sayHello() {\n  Serial.println("Hello");\n}\nvoid setup() {\n  Serial.begin(9600);\n  sayHello();\n  sayHello;\n}\nvoid loop() {\n}', checks: [{ pattern: /sayHello\s*\(\s*\)\s*;[\s\S]*sayHello\s*\(\s*\)\s*;/, message: 'Функция должна вызываться со скобками' }] },
 
   // ═══ ЭТАП 3: ПИНЫ (16–25) ═══
-  { id: 16, title: 'Светодиод', x: 25, y: 60, type: 'write',
-    task: 'В setup() настрой пин 13 как выход. В loop() включи его.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(16),
-      { pattern: /pinMode\s*\(\s*13\s*,\s*OUTPUT\s*\)\s*;/, message: 'В setup() нужен pinMode(13, OUTPUT);' },
-      { pattern: /digitalWrite\s*\(\s*13\s*,\s*HIGH\s*\)\s*;/, message: 'В loop() нужен digitalWrite(13, HIGH);' }
-    ] },
-
-  { id: 17, title: 'Кнопка', x: 25, y: 51, type: 'write',
-    task: 'Настрой пин 2 как вход с подтяжкой. Прочитай его в переменную.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(17),
-      { pattern: /pinMode\s*\(\s*2\s*,\s*INPUT_PULLUP\s*\)\s*;/, message: 'В setup() нужен pinMode(2, INPUT_PULLUP);' },
-      { pattern: /digitalRead\s*\(\s*2\s*\)\s*;/, message: 'В loop() нужен digitalRead(2);' }
-    ] },
-
-  { id: 18, title: 'Кнопка + LED', x: 35, y: 50, type: 'write',
-    task: 'Настрой пины. Если кнопка нажата, включи светодиод.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(18),
-      { pattern: /if\s*\(\s*digitalRead\s*\(\s*2\s*\)\s*==\s*LOW\s*\)\s*\{/, message: 'В loop() нужно if (digitalRead(2) == LOW)' },
-      { pattern: /digitalWrite\s*\(\s*13\s*,\s*HIGH\s*\)\s*;/, message: 'Включи светодиод: digitalWrite(13, HIGH);' }
-    ] },
-
-  { id: 19, title: 'ШИМ', x: 45, y: 50, type: 'write',
-    task: 'Плавно меняй яркость на пине 9 от 0 до 255.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(19),
-      { pattern: /analogWrite\s*\(\s*9\s*,/, message: 'Нужен analogWrite(9, ...);' },
-      { pattern: /for|while/, message: 'Используй цикл' }
-    ] },
-
-  { id: 20, title: 'Потенциометр', x: 55, y: 50, type: 'write',
-    task: 'Прочитай значение с A0 и выведи его в порт.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(20),
-      { pattern: /analogRead\s*\(\s*A0\s*\)\s*;/, message: 'Нужен analogRead(A0);' },
-      { pattern: /Serial\s*\.\s*println\s*\(/, message: 'Выведи результат: Serial.println();' }
-    ] },
-
-  { id: 21, title: 'millis()', x: 65, y: 50, type: 'write',
-    task: 'Каждую секунду выводи "Тик" (без delay).',
-    starterCode: 'unsigned long lastTime = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(21),
-      { pattern: /millis\s*\(\s*\)/, message: 'Используй millis()' },
-      { pattern: /1000/, message: 'Сравнивай с 1000' }
-    ] },
-
-  { id: 22, title: 'Секунды', x: 75, y: 50, type: 'write',
-    task: 'Счётчик секунд, увеличивается каждую секунду.',
-    starterCode: 'int seconds = 0;\nunsigned long lastTime = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(22),
-      { pattern: /seconds\s*\+\+/, message: 'seconds++' },
-      { pattern: /Serial\s*\.\s*println\s*\(\s*seconds\s*\)/, message: 'Выводи seconds' }
-    ] },
-
-  { id: 23, title: 'Кнопка Старт', x: 86, y: 50, type: 'write',
-    task: 'Счётчик увеличивается, только если кнопка нажата.',
-    starterCode: 'int seconds = 0;\nunsigned long lastTime = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(2, INPUT_PULLUP);\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(23),
-      { pattern: /digitalRead\s*\(\s*2\s*\)/, message: 'Читай кнопку' },
-      { pattern: /if\s*\(\s*digitalRead\s*\(\s*2\s*\)\s*==\s*LOW\s*\)/, message: 'Проверяй нажатие' }
-    ] },
-
-  { id: 24, title: 'Сброс', x: 85, y: 40, type: 'write',
-    task: 'Кнопка (пин 3) обнуляет секунды.',
-    starterCode: 'int seconds = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(2, INPUT_PULLUP);\n  pinMode(3, INPUT_PULLUP);\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(24),
-      { pattern: /digitalRead\s*\(\s*3\s*\)/, message: 'Читай кнопку 3' },
-      { pattern: /seconds\s*=\s*0/, message: 'Обнуляй seconds' }
-    ] },
-
-  { id: 25, title: 'Счёт до 60', x: 68, y: 40, type: 'write',
-    task: 'Счёт до 60 и остановка. Вывод в порт.',
-    starterCode: 'int seconds = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(25),
-      { pattern: /if\s*\(\s*\w+\s*>=\s*60\s*\)/, message: 'Проверка >= 60' },
-      { pattern: /Serial\s*\.\s*println/, message: 'Serial.println' }
-    ] },
+  { id: 16, title: 'Светодиод', x: 25, y: 60, type: 'write', task: 'В setup() настрой пин 13 как выход. В loop() включи его.', starterCode: 'void setup() {\n  // Настройка\n}\n\nvoid loop() {\n  // Включить\n}', checks: [{ pattern: /void\s+setup\s*\(\s*\)\s*\{[\s\S]*pinMode\s*\(\s*13\s*,\s*OUTPUT\s*\)/, message: 'В setup() нужен pinMode' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*digitalWrite\s*\(\s*13\s*,\s*HIGH\s*\)/, message: 'В loop() включи светодиод' }] },
+  { id: 17, title: 'Кнопка', x: 25, y: 51, type: 'write', task: 'Настрой пин 2 как вход с подтяжкой. Прочитай его в переменную.', starterCode: 'void setup() {\n  // Настройка\n}\n\nvoid loop() {\n  // Чтение\n}', checks: [{ pattern: /void\s+setup\s*\(\s*\)\s*\{[\s\S]*pinMode\s*\(\s*2\s*,\s*INPUT_PULLUP\s*\)/, message: 'Нужен INPUT_PULLUP' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*digitalRead\s*\(\s*2\s*\)/, message: 'Нужен digitalRead' }] },
+  { id: 18, title: 'Кнопка + LED', x: 35, y: 50, type: 'write', task: 'Настрой пины. Если кнопка нажата, включи светодиод.', starterCode: 'void setup() {\n  pinMode(13, OUTPUT);\n  pinMode(2, INPUT_PULLUP);\n}\n\nvoid loop() {\n  // Условие\n}', checks: [{ pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*if\s*\(\s*digitalRead\s*\(\s*2\s*\)\s*==\s*LOW\s*\)/, message: 'Нужно if (digitalRead == LOW)' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*digitalWrite\s*\(\s*13\s*,\s*HIGH\s*\)/, message: 'Включи светодиод' }] },
+  { id: 19, title: 'ШИМ', x: 45, y: 50, type: 'write', task: 'Плавно меняй яркость на пине 9 от 0 до 255.', starterCode: 'void setup() {\n  pinMode(9, OUTPUT);\n}\n\nvoid loop() {\n  // Плавное изменение\n}', checks: [{ pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*analogWrite\s*\(\s*9\s*,/, message: 'Нужен analogWrite' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*(for|while)/, message: 'Нужен цикл' }] },
+  { id: 20, title: 'Потенциометр', x: 55, y: 50, type: 'write', task: 'Прочитай значение с A0 и выведи его в порт.', starterCode: 'void setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  // Чтение\n}', checks: [{ pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*analogRead\s*\(\s*A0\s*\)/, message: 'Нужен analogRead(A0)' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*Serial\s*\.\s*println/, message: 'Выведи результат' }] },
+  { id: 21, title: 'millis()', x: 65, y: 50, type: 'write', task: 'Каждую секунду выводи "Тик" (без delay).', starterCode: 'unsigned long lastTime = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  // Логика\n}', checks: [{ pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*millis\s*\(\s*\)/, message: 'Используй millis()' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*1000/, message: 'Сравнивай с 1000' }] },
+  { id: 22, title: 'Секунды', x: 75, y: 50, type: 'write', task: 'Счётчик секунд, увеличивается каждую секунду.', starterCode: 'int seconds = 0;\nunsigned long lastTime = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  // Логика\n}', checks: [{ pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*seconds\s*\+\+/, message: 'seconds++' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*Serial\s*\.\s*println\s*\(\s*seconds\s*\)/, message: 'Выводи seconds' }] },
+  { id: 23, title: 'Кнопка Старт', x: 86, y: 50, type: 'write', task: 'Счётчик увеличивается, только если кнопка нажата.', starterCode: 'int seconds = 0;\nunsigned long lastTime = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(2, INPUT_PULLUP);\n}\n\nvoid loop() {\n  // Логика\n}', checks: [{ pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*digitalRead\s*\(\s*2\s*\)/, message: 'Читай кнопку' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*if\s*\(\s*digitalRead\s*\(\s*2\s*\)\s*==\s*LOW\s*\)/, message: 'Проверяй нажатие' }] },
+  { id: 24, title: 'Сброс', x: 85, y: 40, type: 'write', task: 'Кнопка (пин 3) обнуляет секунды.', starterCode: 'int seconds = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(2, INPUT_PULLUP);\n  pinMode(3, INPUT_PULLUP);\n}\n\nvoid loop() {\n  // Логика\n}', checks: [{ pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*digitalRead\s*\(\s*3\s*\)/, message: 'Читай кнопку 3' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*seconds\s*=\s*0/, message: 'Обнуляй seconds' }] },
+  { id: 25, title: 'Счёт до 60', x: 68, y: 40, type: 'write', task: 'Счёт до 60 и остановка. Вывод в порт.', starterCode: 'int seconds = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  // Логика\n}', checks: [{ pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*if\s*\(\s*\w+\s*>=\s*60\s*\)/, message: 'Проверка >= 60' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*Serial\s*\.\s*println/, message: 'Serial.println' }] },
 
   // ═══ ЭТАП 4: ФУНКЦИИ И МАССИВЫ (26–35) ═══
-  { id: 26, title: 'map()', x: 55, y: 40, type: 'write',
-    task: 'Переведи значение с A0 (0-1023) в 0-255 через map().',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(26),
-      { pattern: /analogRead\s*\(\s*A0\s*\)/, message: 'analogRead' },
-      { pattern: /map\s*\(\s*.*0\s*,\s*1023\s*,\s*0\s*,\s*255\s*\)/, message: 'map(value, 0, 1023, 0, 255)' }
-    ] },
+  { id: 26, title: 'map()', x: 55, y: 40, type: 'write', task: 'Переведи значение с A0 (0-1023) в 0-255 через map().', starterCode: 'void setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  // Логика\n}', checks: [{ pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*analogRead\s*\(\s*A0\s*\)/, message: 'analogRead' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*map\s*\(\s*.*0\s*,\s*1023\s*,\s*0\s*,\s*255\s*\)/, message: 'map(value, 0, 1023, 0, 255)' }] },
+  { id: 27, title: 'Звук', x: 40, y: 39, type: 'write', task: 'Издай звук 440 Гц на пине 8.', starterCode: 'void setup() {\n}\n\nvoid loop() {\n  // Звук\n}', checks: [{ pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*tone\s*\(\s*8\s*,\s*440\s*\)/, message: 'tone(8, 440)' }] },
+  { id: 28, title: 'Сервопривод', x: 41, y: 30, type: 'write', task: 'Подключи Servo и поверни мотор на 90 градусов.', starterCode: '#include <Servo.h>\nServo myServo;\n\nvoid setup() {\n  // Подключение\n}\n\nvoid loop() {\n  // Поворот\n}', checks: [{ pattern: /void\s+setup\s*\(\s*\)\s*\{[\s\S]*myServo\s*\.\s*attach\s*\(\s*\d+\s*\)/, message: 'myServo.attach()' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*myServo\s*\.\s*write\s*\(\s*90\s*\)/, message: 'myServo.write(90)' }] },
+  { id: 29, title: 'Случайность', x: 48, y: 30, type: 'write', task: 'Сгенерируй случайное число от 1 до 100.', starterCode: 'void setup() {\n  Serial.begin(9600);\n  // Генератор\n}\n\nvoid loop() {\n  // Случайное число\n}', checks: [{ pattern: /void\s+setup\s*\(\s*\)\s*\{[\s\S]*randomSeed/, message: 'randomSeed' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*random\s*\(\s*1\s*,\s*101\s*\)/, message: 'random(1, 101)' }] },
+  { id: 30, title: 'Мастер', x: 53, y: 25, type: 'write', task: 'Кнопка (2) включает LED (13) и звук (8).', starterCode: 'void setup() {\n  // Настройка\n}\n\nvoid loop() {\n  // Логика\n}', checks: [{ pattern: /void\s+setup\s*\(\s*\)\s*\{[\s\S]*pinMode\s*\(\s*13\s*,\s*OUTPUT\s*\)/, message: 'pinMode(13, OUTPUT)' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*digitalRead\s*\(\s*2\s*\)/, message: 'digitalRead(2)' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*digitalWrite\s*\(\s*13\s*,\s*HIGH\s*\)/, message: 'digitalWrite(13, HIGH)' }, { pattern: /void\s+loop\s*\(\s*\)\s*\{[\s\S]*tone\s*\(\s*8/, message: 'tone(8)' }] },
+  { id: 31, title: 'Массивы', x: 50, y: 30, type: 'write', task: 'Объяви массив из 3 чисел и настрой пины через цикл.', starterCode: 'void setup() {\n  // Твой код\n}\n\nvoid loop() {\n}', checks: [{ pattern: /int\s+\w+\s*\[\s*3\s*\]\s*=\s*\{/, message: 'Массив int arr[3]' }, { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*3\s*;/, message: 'Цикл for' }, { pattern: /pinMode\s*\(\s*\w+\s*\[\s*\w+\s*\]\s*,\s*OUTPUT\s*\)/, message: 'pinMode(arr[i], OUTPUT)' }] },
+  { id: 32, title: 'Массив: мигание', x: 55, y: 25, type: 'write', task: 'По очереди включай светодиоды из массива с паузой 200 мс.', starterCode: 'int leds[3] = {9, 10, 11};\n\nvoid setup() {\n  for (int i = 0; i < 3; i++) {\n    pinMode(leds[i], OUTPUT);\n  }\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*3\s*;/, message: 'Цикл for' }, { pattern: /digitalWrite\s*\(\s*\w+\s*\[\s*\w+\s*\]\s*,\s*HIGH\s*\)/, message: 'digitalWrite(arr[i], HIGH)' }, { pattern: /delay\s*\(\s*200\s*\)/, message: 'delay(200)' }] },
+  { id: 33, title: 'Своя функция', x: 60, y: 20, type: 'write', task: 'Создай функцию blink(), которая мигает LED (13).', starterCode: 'void setup() {\n  pinMode(13, OUTPUT);\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /void\s+blink\s*\(\s*\)\s*\{/, message: 'Функция blink()' }, { pattern: /digitalWrite\s*\(\s*13\s*,\s*HIGH\s*\)/, message: 'digitalWrite(13, HIGH)' }, { pattern: /delay\s*\(/, message: 'delay()' }] },
+  { id: 34, title: 'Функция с параметром', x: 65, y: 25, type: 'write', task: 'Функция blinkTimes(times, pause) мигает N раз.', starterCode: 'void setup() {\n  pinMode(13, OUTPUT);\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /void\s+blinkTimes\s*\(\s*int\s+\w+\s*,\s*int\s+\w+\s*\)/, message: 'blinkTimes(int, int)' }, { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*\w+\s*;/, message: 'for' }] },
+  { id: 35, title: 'Функция с return', x: 70, y: 30, type: 'write', task: 'Функция average(a, b) возвращает среднее.', starterCode: 'void setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /int\s+average\s*\(\s*int\s+\w+\s*,\s*int\s+\w+\s*\)/, message: 'int average(int, int)' }, { pattern: /return\s+/, message: 'return' }] },
 
-  { id: 27, title: 'Звук', x: 40, y: 39, type: 'write',
-    task: 'Издай звук 440 Гц на пине 8.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(27),
-      { pattern: /tone\s*\(\s*8\s*,\s*440\s*\)/, message: 'tone(8, 440)' }
-    ] },
+  // ═══ ЭТАП 5: КИМ (36–50) ═══
+  { id: 36, title: 'КИМ: Разряды', x: 70, y: 35, type: 'write', task: 'Объяви два массива: digits (4 пина) и segments (7 пинов). В setup() настрой все эти пины как OUTPUT через циклы.', starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}', checks: [{ pattern: /byte\s+digits\s*\[\s*\]/, message: 'Массив digits' }, { pattern: /byte\s+segments\s*\[\s*\]/, message: 'Массив segments' }, { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*4\s*;/, message: 'Цикл для 4 разрядов' }, { pattern: /pinMode\s*\(\s*digits\s*\[\s*\w+\s*\]\s*,\s*OUTPUT\s*\)/, message: 'pinMode(digits[i], OUTPUT)' }, { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*7\s*;/, message: 'Цикл для 7 сегментов' }, { pattern: /pinMode\s*\(\s*segments\s*\[\s*\w+\s*\]\s*,\s*OUTPUT\s*\)/, message: 'pinMode(segments[i], OUTPUT)' }] },
+  { id: 37, title: 'КИМ: Массив цифр', x: 72, y: 32, type: 'write', task: 'Объяви двумерный массив numbers[10][7], где каждая строка — комбинация сегментов для цифры от 0 до 9.', starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}', checks: [{ pattern: /byte\s+numbers\s*\[\s*10\s*\]\s*\[\s*7\s*\]/, message: 'Массив byte numbers[10][7]' }, { pattern: /\{\s*1\s*,\s*1\s*,\s*1\s*,\s*1\s*,\s*1\s*,\s*1\s*,\s*0\s*\}/, message: 'Строка для цифры 0' }, { pattern: /\{\s*0\s*,\s*1\s*,\s*1\s*,\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\}/, message: 'Строка для цифры 1' }] },
+  { id: 38, title: 'КИМ: Функция вывода', x: 74, y: 28, type: 'write', task: 'Напиши функцию display(int dig, int num), которая гасит все разряды, зажигает сегменты по numbers[num] и включает нужный разряд dig.', starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}', checks: [{ pattern: /void\s+display\s*\(\s*int\s+\w+\s*,\s*int\s+\w+\s*\)/, message: 'display(int dig, int num)' }, { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*7\s*;/, message: 'Цикл по 7 сегментам' }, { pattern: /digitalWrite\s*\(\s*segments\s*\[\s*\w+\s*\]\s*,\s*numbers\s*\[\s*\w+\s*\]\s*\[\s*\w+\s*\]/, message: 'Зажигай сегменты по numbers[num][i]' }, { pattern: /digitalWrite\s*\(\s*digits\s*\[\s*\w+\s*\]\s*,\s*HIGH\s*\)/, message: 'digitalWrite(digits[dig-1], HIGH)' }] },
+  { id: 39, title: 'КИМ: Кнопка', x: 76, y: 24, type: 'write', task: 'В setup() настрой пин 1 как INPUT_PULLUP. В loop() прочитай кнопку в переменную ButtonState и переключай флаг timerState при нажатии.', starterCode: 'bool timerState = 0;\n\nvoid setup() {\n  // Твой код\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /pinMode\s*\(\s*1\s*,\s*INPUT_PULLUP\s*\)/, message: 'pinMode(1, INPUT_PULLUP)' }, { pattern: /digitalRead\s*\(\s*1\s*\)/, message: 'digitalRead(1)' }, { pattern: /if\s*\(\s*ButtonState\s*==\s*0\s*\)/, message: 'if (ButtonState == 0)' }, { pattern: /timerState\s*=\s*!\s*timerState/, message: 'timerState = !timerState' }] },
+  { id: 40, title: 'КИМ: millis()', x: 78, y: 20, type: 'write', task: 'В loop() добавь условие: если прошло 1000 мс и timerState == 1, увеличь timer и обнови StartTime.', starterCode: 'bool timerState = 1;\nunsigned long StartTime = 0;\nint timer = 0;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /millis\s*\(\s*\)\s*-\s*StartTime\s*>=\s*1000/, message: 'millis() - StartTime >= 1000' }, { pattern: /timerState\s*==\s*1/, message: 'timerState == 1' }, { pattern: /timer\s*\+\+/, message: 'timer++' }, { pattern: /StartTime\s*=\s*millis\s*\(\s*\)/, message: 'StartTime = millis()' }] },
+  { id: 41, title: 'КИМ: Минуты (десятки)', x: 80, y: 16, type: 'write', task: 'В loop() вызови display(1, minutes / 10), чтобы вывести десятки минут.', starterCode: 'int minutes = 2;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /display\s*\(\s*1\s*,\s*minutes\s*\/\s*10\s*\)/, message: 'display(1, minutes / 10)' }] },
+  { id: 42, title: 'КИМ: Минуты (единицы)', x: 82, y: 14, type: 'write', task: 'В loop() вызови display(2, minutes % 10), чтобы вывести единицы минут.', starterCode: 'int minutes = 2;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /display\s*\(\s*2\s*,\s*minutes\s*%\s*10\s*\)/, message: 'display(2, minutes % 10)' }] },
+  { id: 43, title: 'КИМ: Секунды (десятки)', x: 84, y: 12, type: 'write', task: 'В loop() вызови display(3, seconds / 10), чтобы вывести десятки секунд.', starterCode: 'int seconds = 0;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /display\s*\(\s*3\s*,\s*seconds\s*\/\s*10\s*\)/, message: 'display(3, seconds / 10)' }] },
+  { id: 44, title: 'КИМ: Секунды (единицы)', x: 86, y: 10, type: 'write', task: 'В loop() вызови display(4, seconds % 10), чтобы вывести единицы секунд.', starterCode: 'int seconds = 0;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /display\s*\(\s*4\s*,\s*seconds\s*%\s*10\s*\)/, message: 'display(4, seconds % 10)' }] },
+  { id: 45, title: 'КИМ: Точка (DP)', x: 88, y: 8, type: 'write', task: 'В loop() добавь мигание точки: digitalWrite(dp, !digitalRead(dp)).', starterCode: 'int dp = 13;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /digitalWrite\s*\(\s*dp\s*,\s*!\s*digitalRead\s*\(\s*dp\s*\)\s*\)/, message: 'digitalWrite(dp, !digitalRead(dp))' }] },
+  { id: 46, title: 'КИМ: Сборка (1)', x: 60, y: 50, type: 'write', task: 'Собери части: в loop() добавь обработку кнопки (пин 1) и условие millis() для timer++.', starterCode: 'bool timerState = 0;\nunsigned long StartTime = 0;\nint timer = 0;\n\nvoid setup() {\n  pinMode(1, INPUT_PULLUP);\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /digitalRead\s*\(\s*1\s*\)/, message: 'Читай кнопку' }, { pattern: /timerState\s*=\s*!\s*timerState/, message: 'Переключай флаг' }, { pattern: /millis\s*\(\s*\)\s*-\s*StartTime\s*>=\s*1000/, message: 'Условие millis' }, { pattern: /timer\s*\+\+/, message: 'Увеличивай timer' }] },
+  { id: 47, title: 'КИМ: Сборка (2)', x: 55, y: 45, type: 'write', task: 'Добавь в loop() вывод четырёх разрядов: display(1, timer / 1000), display(2, timer / 100 % 10), display(3, timer % 100 / 10), display(4, timer % 10).', starterCode: 'int timer = 0;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /display\s*\(\s*1\s*,\s*timer\s*\/\s*1000\s*\)/, message: 'display(1, timer / 1000)' }, { pattern: /display\s*\(\s*2\s*,\s*timer\s*\/\s*100\s*%\s*10\s*\)/, message: 'display(2, timer / 100 % 10)' }, { pattern: /display\s*\(\s*3\s*,\s*timer\s*%\s*100\s*\/\s*10\s*\)/, message: 'display(3, timer % 100 / 10)' }, { pattern: /display\s*\(\s*4\s*,\s*timer\s*%\s*10\s*\)/, message: 'display(4, timer % 10)' }] },
+  { id: 48, title: 'КИМ: Остановка на 60', x: 50, y: 40, type: 'write', task: 'Добавь в loop() проверку: если timer == 60, сбросить timer = 0 и timerState = 0.', starterCode: 'int timer = 0;\nbool timerState = 1;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}', checks: [{ pattern: /if\s*\(\s*timer\s*==\s*60\s*\)/, message: 'Проверка timer == 60' }, { pattern: /timer\s*=\s*0/, message: 'Сброс timer = 0' }, { pattern: /timerState\s*=\s*0/, message: 'Сброс timerState = 0' }] },
+  { id: 49, title: 'КИМ: Функция display()', x: 45, y: 35, type: 'write', task: 'Напиши полную функцию display(int dig, int num): гасит все разряды, зажигает сегменты по numbers[num], включает разряд dig, ждёт 3 мс, гасит разряд.', starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}', checks: [{ pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*7\s*;/, message: 'Цикл по 7 сегментам' }, { pattern: /digitalWrite\s*\(\s*segments\s*\[\s*\w+\s*\]\s*,\s*numbers\s*\[\s*\w+\s*\]\s*\[\s*\w+\s*\]/, message: 'Зажигай сегменты по numbers[num][i]' }, { pattern: /digitalWrite\s*\(\s*digits\s*\[\s*\w+\s*\]\s*,\s*HIGH\s*\)/, message: 'Включай разряд' }, { pattern: /delay\s*\(\s*3\s*\)/, message: 'delay(3)' }, { pattern: /digitalWrite\s*\(\s*digits\s*\[\s*\w+\s*\]\s*,\s*LOW\s*\)/, message: 'Гаси разряд' }] },
+  { id: 50, title: 'Мастер КИМ', x: 40, y: 30, type: 'write', task: 'Собери полный код секундомера: массивы digits, segments, numbers[10][7], функция display(), обработка кнопки, millis(), вывод 4 разрядов.', starterCode: '// Твой код\n', checks: [{ pattern: /byte\s+digits\s*\[\s*\]/, message: 'Массив digits' }, { pattern: /byte\s+segments\s*\[\s*\]/, message: 'Массив segments' }, { pattern: /byte\s+numbers\s*\[\s*10\s*\]\s*\[\s*7\s*\]/, message: 'Массив numbers' }, { pattern: /void\s+display\s*\(\s*int\s+\w+\s*,\s*int\s+\w+\s*\)/, message: 'Функция display()' }, { pattern: /digitalRead\s*\(\s*1\s*\)/, message: 'Чтение кнопки' }, { pattern: /millis\s*\(\s*\)/, message: 'Использование millis()' }, { pattern: /display\s*\(\s*1\s*,/, message: 'Вывод разряда 1' }] },
 
-  { id: 28, title: 'Сервопривод', x: 41, y: 30, type: 'write',
-    task: 'Подключи Servo и поверни мотор на 90 градусов.',
-    starterCode: '#include <Servo.h>\nServo myServo;\n\nvoid setup() {\n  // Твой код\n}\n\nvoid loop() {\n}',
-    checks: [
-      { pattern: /#include\s*<Servo\.h>/, message: 'Нужен #include <Servo.h>' },
-      { pattern: /Servo\s+\w+;/, message: 'Нужен объект Servo' },
-      { pattern: /void\s+setup\s*\(\s*\)\s*\{/, message: 'Нужна setup()' },
-      { pattern: /void\s+loop\s*\(\s*\)\s*\{/, message: 'Нужна loop()' },
-      { pattern: /myServo\s*\.\s*attach\s*\(\s*\d+\s*\)\s*;/, message: 'myServo.attach()' },
-      { pattern: /myServo\s*\.\s*write\s*\(\s*90\s*\)\s*;/, message: 'myServo.write(90)' }
-    ] },
+  // ═══ ЭТАП 6: ТЕСТЫ КИМ (51–100) ═══
+  // --- Тема: Комплектующие и сборка ПК (51-60) ---
+  { id: 51, title: 'Тест: Процессор', x: 50, y: 30, type: 'quiz', task: 'В какой разъем материнской платы устанавливается процессор?', options: ['PCI Express', 'SATA', 'Socket (Сокет)', 'DIMM'], correctOption: 2, checks: [] },
+  { id: 52, title: 'Тест: Оперативная память', x: 51, y: 28, type: 'quiz', task: 'Какой тип памяти используется в современных ПК?', options: ['DDR2', 'DDR3', 'DDR4/DDR5', 'SRAM'], correctOption: 2, checks: [] },
+  { id: 53, title: 'Тест: Блок питания', x: 52, y: 26, type: 'quiz', task: 'Сколько контактов у основного разъема питания материнской платы (ATX)?', options: ['20', '24', '8', '4'], correctOption: 1, checks: [] },
+  { id: 54, title: 'Тест: Термопаста', x: 53, y: 24, type: 'quiz', task: 'Куда наносится термопаста?', options: ['На контакты сокета', 'Между процессором и радиатором кулера', 'На материнскую плату', 'На видеокарту'], correctOption: 1, checks: [] },
+  { id: 55, title: 'Тест: Форм-фактор', x: 54, y: 22, type: 'quiz', task: 'Какой стандартный размер материнской платы для обычного ПК?', options: ['Micro-USB', 'Mini-ITX', 'ATX', 'SATA'], correctOption: 2, checks: [] },
+  { id: 56, title: 'Тест: Накопители', x: 55, y: 20, type: 'quiz', task: 'Какой интерфейс у современных быстрых SSD?', options: ['IDE', 'PCI', 'NVMe (M.2)', 'FDD'], correctOption: 2, checks: [] },
+  { id: 57, title: 'Тест: Видеокарта', x: 56, y: 22, type: 'quiz', task: 'В какой слот устанавливается видеокарта?', options: ['PCI Express x16', 'SATA', 'M.2', 'DIMM'], correctOption: 0, checks: [] },
+  { id: 58, title: 'Тест: Статика', x: 57, y: 24, type: 'quiz', task: 'Что нужно сделать перед тем, как трогать комплектующие ПК?', options: ['Помыть руки', 'Снять статическое электричество (заземлиться)', 'Надеть перчатки', 'Включить ПК'], correctOption: 1, checks: [] },
+  { id: 59, title: 'Тест: Кулер', x: 58, y: 26, type: 'quiz', task: 'Для чего нужен кулер в ПК?', options: ['Для связи с интернетом', 'Для охлаждения процессора', 'Для хранения данных', 'Для звука'], correctOption: 1, checks: [] },
+  { id: 60, title: 'Тест: POST', x: 59, y: 28, type: 'quiz', task: 'Если спикер издает 1 длинный и 2 коротких сигнала, что это значит?', options: ['Все работает', 'Ошибка ОЗУ', 'Ошибка видеокарты', 'Ошибка клавиатуры'], correctOption: 2, checks: [] },
 
-  { id: 29, title: 'Случайность', x: 48, y: 30, type: 'write',
-    task: 'Сгенерируй случайное число от 1 до 100.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(29),
-      { pattern: /randomSeed/, message: 'randomSeed' },
-      { pattern: /random\s*\(\s*1\s*,\s*101\s*\)/, message: 'random(1, 101)' }
-    ] },
+  // --- Тема: Диагностика и ремонт (61-70) ---
+  { id: 61, title: 'Тест: Не включается', x: 60, y: 30, type: 'quiz', task: 'ПК не включается, вентиляторы не крутятся. Что проверить в первую очередь?', options: ['Кабель питания и кнопку Power', 'Драйверы', 'Операционную систему', 'Интернет'], correctOption: 0, checks: [] },
+  { id: 62, title: 'Тест: Черный экран', x: 61, y: 32, type: 'quiz', task: 'Вентиляторы крутятся, но экран черный. Что проверить?', options: ['Кабель монитора и видеокарту', 'Клавиатуру', 'Звук', 'Мышь'], correctOption: 0, checks: [] },
+  { id: 63, title: 'Тест: BIOS', x: 62, y: 34, type: 'quiz', task: 'ПК сбивает время при выключении. Что вышло из строя?', options: ['Процессор', 'Батарейка CMOS (CR2032)', 'Блок питания', 'Жесткий диск'], correctOption: 1, checks: [] },
+  { id: 64, title: 'Тест: Мультиметр', x: 63, y: 36, type: 'quiz', task: 'Для чего нужен мультиметр при ремонте ПК?', options: ['Для проверки напряжения и целостности цепи', 'Для установки Windows', 'Для обжима кабеля', 'Для охлаждения'], correctOption: 0, checks: [] },
+  { id: 65, title: 'Тест: Синий экран', x: 64, y: 38, type: 'quiz', task: 'Что означает синий экран смерти (BSOD)?', options: ['Пользователь зашел не туда', 'Критическая ошибка ОС или драйвера', 'Победа в игре', 'Ошибка сети'], correctOption: 1, checks: [] },
+  { id: 66, title: 'Тест: Перегрев', x: 65, y: 40, type: 'quiz', task: 'ПК выключается через 5 минут после включения. Вероятная причина?', options: ['Перегрев процессора', 'Вирус', 'Нет звука', 'Сбились настройки мыши'], correctOption: 0, checks: [] },
+  { id: 67, title: 'Тест: HDD', x: 66, y: 42, type: 'quiz', task: 'Жесткий диск издает щелкающие звуки. Что делать?', options: ['Срочно сохранить данные и заменить диск', 'Постучать по нему', 'Перезагрузить ПК', 'Ничего не делать'], correctOption: 0, checks: [] },
+  { id: 68, title: 'Тест: Безопасный режим', x: 67, y: 44, type: 'quiz', task: 'Зачем нужен Безопасный режим Windows?', options: ['Для игр', 'Для загрузки ОС с минимальным набором драйверов (диагностика)', 'Для просмотра видео', 'Для установки антивируса'], correctOption: 1, checks: [] },
 
-  { id: 30, title: 'Мастер', x: 53, y: 25, type: 'write',
-    task: 'Кнопка (2) включает LED (13) и звук (8).',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(30),
-      { pattern: /pinMode\s*\(\s*13\s*,\s*OUTPUT\s*\)/, message: 'pinMode(13, OUTPUT)' },
-      { pattern: /digitalRead\s*\(\s*2\s*\)/, message: 'digitalRead(2)' },
-      { pattern: /digitalWrite\s*\(\s*13\s*,\s*HIGH\s*\)/, message: 'digitalWrite(13, HIGH)' },
-      { pattern: /tone\s*\(\s*8/, message: 'tone(8)' }
-    ] },
+  // --- Тема: Сети (69-78) ---
+  { id: 69, title: 'Тест: RJ-45', x: 68, y: 46, type: 'quiz', task: 'Какой разъем используется для витой пары (Ethernet)?', options: ['RJ-11', 'RJ-45', 'USB', 'HDMI'], correctOption: 1, checks: [] },
+  { id: 70, title: 'Тест: Кабель UTP', x: 69, y: 48, type: 'quiz', task: 'Что такое UTP?', options: ['Неэкранированная витая пара', 'Оптоволокно', 'Коаксиальный кабель', 'Беспроводной сигнал'], correctOption: 0, checks: [] },
+  { id: 71, title: 'Тест: T568B', x: 70, y: 50, type: 'quiz', task: 'Какой провод идет первым при обжиме по стандарту T568B?', options: ['Бело-зеленый', 'Бело-оранжевый', 'Синий', 'Коричневый'], correctOption: 1, checks: [] },
+  { id: 72, title: 'Тест: Коммутатор', x: 71, y: 52, type: 'quiz', task: 'Чем Switch (коммутатор) отличается от Hub (концентратора)?', options: ['Ничем', 'Switch передает данные только тому, кому нужно', 'Hub быстрее', 'Switch не работает с IP'], correctOption: 1, checks: [] },
+  { id: 73, title: 'Тест: IPv4', x: 72, y: 54, type: 'quiz', task: 'Сколько бит в адресе IPv4?', options: ['16', '32', '64', '128'], correctOption: 1, checks: [] },
+  { id: 74, title: 'Тест: DHCP', x: 73, y: 56, type: 'quiz', task: 'Что делает DHCP-сервер?', options: ['Раздает IP-адреса автоматически', 'Обжимает кабель', 'Ставит Windows', 'Защищает от вирусов'], correctOption: 0, checks: [] },
+  { id: 75, title: 'Тест: Кримпер', x: 74, y: 58, type: 'quiz', task: 'Каким инструментом обжимают RJ-45?', options: ['Пинцетом', 'Кримпером', 'Отверткой', 'Плоскогубцами'], correctOption: 1, checks: [] },
+  { id: 76, title: 'Тест: LAN', x: 75, y: 60, type: 'quiz', task: 'Что такое LAN?', options: ['Глобальная сеть', 'Локальная сеть', 'Спутниковая связь', 'Bluetooth'], correctOption: 1, checks: [] },
+  { id: 77, title: 'Тест: LAN-тестер', x: 76, y: 62, type: 'quiz', task: 'Для чего нужен LAN-тестер?', options: ['Для проверки целостности кабеля и правильности обжима', 'Для выхода в интернет', 'Для скачивания игр', 'Для печати'], correctOption: 0, checks: [] },
+  { id: 78, title: 'Тест: Wi-Fi', x: 77, y: 64, type: 'quiz', task: 'Какие частоты чаще всего использует Wi-Fi?', options: ['2.4 ГГц и 5 ГГц', '10 ГГц', '1 ГГц', '100 МГц'], correctOption: 0, checks: [] },
 
-  { id: 31, title: 'Массивы', x: 50, y: 30, type: 'write',
-    task: 'Объяви массив из 3 чисел и настрой пины через цикл.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(31),
-      { pattern: /int\s+\w+\s*\[\s*3\s*\]\s*=\s*\{/, message: 'Массив int arr[3]' },
-      { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*3\s*;/, message: 'Цикл for' },
-      { pattern: /pinMode\s*\(\s*\w+\s*\[\s*\w+\s*\]\s*,\s*OUTPUT\s*\)/, message: 'pinMode(arr[i], OUTPUT)' }
-    ] },
+  // --- Тема: ОС и ПО (79-86) ---
+  { id: 79, title: 'Тест: Разделы диска', x: 78, y: 66, type: 'quiz', task: 'На какой раздел обычно устанавливается Windows?', options: ['D', 'C', 'E', 'F'], correctOption: 1, checks: [] },
+  { id: 80, title: 'Тест: Драйверы', x: 79, y: 68, type: 'quiz', task: 'Что такое драйвер?', options: ['Игра', 'Программа для связи ОС с оборудованием', 'Антивирус', 'Браузер'], correctOption: 1, checks: [] },
+  { id: 81, title: 'Тест: BIOS/UEFI', x: 80, y: 70, type: 'quiz', task: 'Что такое BIOS/UEFI?', options: ['Операционная система', 'Базовая система ввода-вывода', 'Видеокарта', 'Процессор'], correctOption: 1, checks: [] },
+  { id: 82, title: 'Тест: Файловая система', x: 81, y: 72, type: 'quiz', task: 'Какая файловая система используется в Windows по умолчанию?', options: ['FAT32', 'NTFS', 'EXT4', 'APFS'], correctOption: 1, checks: [] },
+  { id: 83, title: 'Тест: Форматирование', x: 82, y: 74, type: 'quiz', task: 'Что делает форматирование диска?', options: ['Ускоряет ПК', 'Удаляет все данные и создает файловую систему', 'Устанавливает драйверы', 'Скачивает обновления'], correctOption: 1, checks: [] },
+  { id: 84, title: 'Тест: Администратор', x: 83, y: 76, type: 'quiz', task: 'Зачем нужна учетная запись администратора?', options: ['Для игр', 'Для полного контроля над системой и настройками', 'Для просмотра фото', 'Для прослушивания музыки'], correctOption: 1, checks: [] },
+  { id: 85, title: 'Тест: Антивирус', x: 84, y: 78, type: 'quiz', task: 'Что делает антивирус?', options: ['Ускоряет интернет', 'Находит и удаляет вредоносное ПО', 'Улучшает графику', 'Охлаждает ПК'], correctOption: 1, checks: [] },
+  { id: 86, title: 'Тест: Диспетчер задач', x: 85, y: 80, type: 'quiz', task: 'Как открыть Диспетчер задач в Windows?', options: ['Ctrl+Alt+Del', 'Ctrl+C', 'Alt+F4', 'Win+R'], correctOption: 0, checks: [] },
 
-  { id: 32, title: 'Массив: мигание', x: 55, y: 25, type: 'write',
-    task: 'По очереди включай светодиоды из массива с паузой 200 мс.',
-    starterCode: 'int leds[3] = {9, 10, 11};\n\nvoid setup() {\n  for (int i = 0; i < 3; i++) {\n    pinMode(leds[i], OUTPUT);\n  }\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(32),
-      { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*3\s*;/, message: 'Цикл for' },
-      { pattern: /digitalWrite\s*\(\s*\w+\s*\[\s*\w+\s*\]\s*,\s*HIGH\s*\)/, message: 'digitalWrite(arr[i], HIGH)' },
-      { pattern: /delay\s*\(\s*200\s*\)/, message: 'delay(200)' }
-    ] },
-
-  { id: 33, title: 'Своя функция', x: 60, y: 20, type: 'write',
-    task: 'Создай функцию blink(), которая мигает LED (13).',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(33),
-      { pattern: /void\s+blink\s*\(\s*\)\s*\{/, message: 'Функция blink()' },
-      { pattern: /digitalWrite\s*\(\s*13\s*,\s*HIGH\s*\)/, message: 'digitalWrite(13, HIGH)' },
-      { pattern: /delay\s*\(/, message: 'delay()' }
-    ] },
-
-  { id: 34, title: 'Функция с параметром', x: 65, y: 25, type: 'write',
-    task: 'Функция blinkTimes(times, pause) мигает N раз.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(34),
-      { pattern: /void\s+blinkTimes\s*\(\s*int\s+\w+\s*,\s*int\s+\w+\s*\)/, message: 'blinkTimes(int, int)' },
-      { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*\w+\s*;/, message: 'for' }
-    ] },
-
-  { id: 35, title: 'Функция с return', x: 70, y: 30, type: 'write',
-    task: 'Функция average(a, b) возвращает среднее.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(35),
-      { pattern: /int\s+average\s*\(\s*int\s+\w+\s*,\s*int\s+\w+\s*\)/, message: 'int average(int, int)' },
-      { pattern: /return\s+/, message: 'return' }
-    ] },
-
-  // ═══ ЭТАП 5: ПОДГОТОВКА К КИМ (36–50) ═══
-  { id: 36, title: 'КИМ: Разряды', x: 70, y: 35, type: 'write',
-    task: 'Объяви два массива: digits (4 пина) и segments (7 пинов). В setup() настрой все эти пины как OUTPUT через циклы.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(36),
-      { pattern: /byte\s+digits\s*\[\s*\]/, message: 'Массив digits' },
-      { pattern: /byte\s+segments\s*\[\s*\]/, message: 'Массив segments' },
-      { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*4\s*;/, message: 'Цикл для 4 разрядов' },
-      { pattern: /pinMode\s*\(\s*digits\s*\[\s*\w+\s*\]\s*,\s*OUTPUT\s*\)/, message: 'pinMode(digits[i], OUTPUT)' },
-      { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*7\s*;/, message: 'Цикл для 7 сегментов' },
-      { pattern: /pinMode\s*\(\s*segments\s*\[\s*\w+\s*\]\s*,\s*OUTPUT\s*\)/, message: 'pinMode(segments[i], OUTPUT)' }
-    ] },
-
-  { id: 37, title: 'КИМ: Массив цифр', x: 72, y: 32, type: 'write',
-    task: 'Объяви двумерный массив numbers[10][7], где каждая строка — комбинация сегментов для цифры от 0 до 9.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(37),
-      { pattern: /byte\s+numbers\s*\[\s*10\s*\]\s*\[\s*7\s*\]/, message: 'Массив byte numbers[10][7]' },
-      { pattern: /\{\s*1\s*,\s*1\s*,\s*1\s*,\s*1\s*,\s*1\s*,\s*1\s*,\s*0\s*\}/, message: 'Строка для цифры 0' },
-      { pattern: /\{\s*0\s*,\s*1\s*,\s*1\s*,\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\}/, message: 'Строка для цифры 1' }
-    ] },
-
-  { id: 38, title: 'КИМ: Функция вывода', x: 74, y: 28, type: 'write',
-    task: 'Напиши функцию display(int dig, int num), которая гасит все разряды, зажигает сегменты по numbers[num] и включает нужный разряд dig.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(38),
-      { pattern: /void\s+display\s*\(\s*int\s+\w+\s*,\s*int\s+\w+\s*\)/, message: 'display(int dig, int num)' },
-      { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*7\s*;/, message: 'Цикл по 7 сегментам' },
-      { pattern: /digitalWrite\s*\(\s*segments\s*\[\s*\w+\s*\]\s*,\s*numbers\s*\[\s*\w+\s*\]\s*\[\s*\w+\s*\]/, message: 'Зажигай сегменты по numbers[num][i]' },
-      { pattern: /digitalWrite\s*\(\s*digits\s*\[\s*\w+\s*\]\s*,\s*HIGH\s*\)/, message: 'digitalWrite(digits[dig-1], HIGH)' }
-    ] },
-
-  { id: 39, title: 'КИМ: Кнопка', x: 76, y: 24, type: 'write',
-    task: 'В setup() настрой пин 1 как INPUT_PULLUP. В loop() прочитай кнопку в переменную ButtonState и переключай флаг timerState при нажатии.',
-    starterCode: 'bool timerState = 0;\n\nvoid setup() {\n  // Твой код\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(39),
-      { pattern: /pinMode\s*\(\s*1\s*,\s*INPUT_PULLUP\s*\)/, message: 'pinMode(1, INPUT_PULLUP)' },
-      { pattern: /digitalRead\s*\(\s*1\s*\)/, message: 'digitalRead(1)' },
-      { pattern: /if\s*\(\s*ButtonState\s*==\s*0\s*\)/, message: 'if (ButtonState == 0)' },
-      { pattern: /timerState\s*=\s*!\s*timerState/, message: 'timerState = !timerState' }
-    ] },
-
-  { id: 40, title: 'КИМ: millis()', x: 78, y: 20, type: 'write',
-    task: 'В loop() добавь условие: если прошло 1000 мс и timerState == 1, увеличь timer и обнови StartTime.',
-    starterCode: 'bool timerState = 1;\nunsigned long StartTime = 0;\nint timer = 0;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(40),
-      { pattern: /millis\s*\(\s*\)\s*-\s*StartTime\s*>=\s*1000/, message: 'millis() - StartTime >= 1000' },
-      { pattern: /timerState\s*==\s*1/, message: 'timerState == 1' },
-      { pattern: /timer\s*\+\+/, message: 'timer++' },
-      { pattern: /StartTime\s*=\s*millis\s*\(\s*\)/, message: 'StartTime = millis()' }
-    ] },
-
-  { id: 41, title: 'КИМ: Минуты (десятки)', x: 80, y: 16, type: 'write',
-    task: 'В loop() вызови display(1, minutes / 10), чтобы вывести десятки минут.',
-    starterCode: 'int minutes = 2;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(41),
-      { pattern: /display\s*\(\s*1\s*,\s*minutes\s*\/\s*10\s*\)/, message: 'display(1, minutes / 10)' }
-    ] },
-
-  { id: 42, title: 'КИМ: Минуты (единицы)', x: 82, y: 14, type: 'write',
-    task: 'В loop() вызови display(2, minutes % 10), чтобы вывести единицы минут.',
-    starterCode: 'int minutes = 2;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(42),
-      { pattern: /display\s*\(\s*2\s*,\s*minutes\s*%\s*10\s*\)/, message: 'display(2, minutes % 10)' }
-    ] },
-
-  { id: 43, title: 'КИМ: Секунды (десятки)', x: 84, y: 12, type: 'write',
-    task: 'В loop() вызови display(3, seconds / 10), чтобы вывести десятки секунд.',
-    starterCode: 'int seconds = 0;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(43),
-      { pattern: /display\s*\(\s*3\s*,\s*seconds\s*\/\s*10\s*\)/, message: 'display(3, seconds / 10)' }
-    ] },
-
-  { id: 44, title: 'КИМ: Секунды (единицы)', x: 86, y: 10, type: 'write',
-    task: 'В loop() вызови display(4, seconds % 10), чтобы вывести единицы секунд.',
-    starterCode: 'int seconds = 0;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(44),
-      { pattern: /display\s*\(\s*4\s*,\s*seconds\s*%\s*10\s*\)/, message: 'display(4, seconds % 10)' }
-    ] },
-
-  { id: 45, title: 'КИМ: Точка (DP)', x: 88, y: 8, type: 'write',
-    task: 'В loop() добавь мигание точки: digitalWrite(dp, !digitalRead(dp)).',
-    starterCode: 'int dp = 13;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(45),
-      { pattern: /digitalWrite\s*\(\s*dp\s*,\s*!\s*digitalRead\s*\(\s*dp\s*\)\s*\)/, message: 'digitalWrite(dp, !digitalRead(dp))' }
-    ] },
-
-  { id: 46, title: 'КИМ: Сборка (1)', x: 60, y: 50, type: 'write',
-    task: 'Собери части: в loop() добавь обработку кнопки (пин 1) и условие millis() для timer++.',
-    starterCode: 'bool timerState = 0;\nunsigned long StartTime = 0;\nint timer = 0;\n\nvoid setup() {\n  pinMode(1, INPUT_PULLUP);\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(46),
-      { pattern: /digitalRead\s*\(\s*1\s*\)/, message: 'Читай кнопку' },
-      { pattern: /timerState\s*=\s*!\s*timerState/, message: 'Переключай флаг' },
-      { pattern: /millis\s*\(\s*\)\s*-\s*StartTime\s*>=\s*1000/, message: 'Условие millis' },
-      { pattern: /timer\s*\+\+/, message: 'Увеличивай timer' }
-    ] },
-
-  { id: 47, title: 'КИМ: Сборка (2)', x: 55, y: 45, type: 'write',
-    task: 'Добавь в loop() вывод четырёх разрядов: display(1, timer / 1000), display(2, timer / 100 % 10), display(3, timer % 100 / 10), display(4, timer % 10).',
-    starterCode: 'int timer = 0;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(47),
-      { pattern: /display\s*\(\s*1\s*,\s*timer\s*\/\s*1000\s*\)/, message: 'display(1, timer / 1000)' },
-      { pattern: /display\s*\(\s*2\s*,\s*timer\s*\/\s*100\s*%\s*10\s*\)/, message: 'display(2, timer / 100 % 10)' },
-      { pattern: /display\s*\(\s*3\s*,\s*timer\s*%\s*100\s*\/\s*10\s*\)/, message: 'display(3, timer % 100 / 10)' },
-      { pattern: /display\s*\(\s*4\s*,\s*timer\s*%\s*10\s*\)/, message: 'display(4, timer % 10)' }
-    ] },
-
-  { id: 48, title: 'КИМ: Остановка на 60', x: 50, y: 40, type: 'write',
-    task: 'Добавь в loop() проверку: если timer == 60, сбросить timer = 0 и timerState = 0.',
-    starterCode: 'int timer = 0;\nbool timerState = 1;\n\nvoid setup() {\n}\n\nvoid loop() {\n  // Твой код\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(48),
-      { pattern: /if\s*\(\s*timer\s*==\s*60\s*\)/, message: 'Проверка timer == 60' },
-      { pattern: /timer\s*=\s*0/, message: 'Сброс timer = 0' },
-      { pattern: /timerState\s*=\s*0/, message: 'Сброс timerState = 0' }
-    ] },
-
-  { id: 49, title: 'КИМ: Функция display()', x: 45, y: 35, type: 'write',
-    task: 'Напиши полную функцию display(int dig, int num): гасит все разряды, зажигает сегменты по numbers[num], включает разряд dig, ждёт 3 мс, гасит разряд.',
-    starterCode: '// Твой код\n\nvoid setup() {\n}\n\nvoid loop() {\n}',
-    checks: [
-      ...STRUCTURE_CHECKS(49),
-      { pattern: /for\s*\(\s*int\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*7\s*;/, message: 'Цикл по 7 сегментам' },
-      { pattern: /digitalWrite\s*\(\s*segments\s*\[\s*\w+\s*\]\s*,\s*numbers\s*\[\s*\w+\s*\]\s*\[\s*\w+\s*\]/, message: 'Зажигай сегменты по numbers[num][i]' },
-      { pattern: /digitalWrite\s*\(\s*digits\s*\[\s*\w+\s*\]\s*,\s*HIGH\s*\)/, message: 'Включай разряд' },
-      { pattern: /delay\s*\(\s*3\s*\)/, message: 'delay(3)' },
-      { pattern: /digitalWrite\s*\(\s*digits\s*\[\s*\w+\s*\]\s*,\s*LOW\s*\)/, message: 'Гаси разряд' }
-    ] },
-
-  { id: 50, title: 'Мастер КИМ', x: 40, y: 30, type: 'write',
-    task: 'Собери полный код секундомера: массивы digits, segments, numbers[10][7], функция display(), обработка кнопки, millis(), вывод 4 разрядов.',
-    starterCode: '// Твой код\n',
-    checks: [
-      ...STRUCTURE_CHECKS(50),
-      { pattern: /byte\s+digits\s*\[\s*\]/, message: 'Массив digits' },
-      { pattern: /byte\s+segments\s*\[\s*\]/, message: 'Массив segments' },
-      { pattern: /byte\s+numbers\s*\[\s*10\s*\]\s*\[\s*7\s*\]/, message: 'Массив numbers' },
-      { pattern: /void\s+display\s*\(\s*int\s+\w+\s*,\s*int\s+\w+\s*\)/, message: 'Функция display()' },
-      { pattern: /digitalRead\s*\(\s*1\s*\)/, message: 'Чтение кнопки' },
-      { pattern: /millis\s*\(\s*\)/, message: 'Использование millis()' },
-      { pattern: /display\s*\(\s*1\s*,/, message: 'Вывод разряда 1' }
-    ] },
+  // --- Тема: Arduino (87-100) ---
+  { id: 87, title: 'Тест: setup()', x: 86, y: 82, type: 'quiz', task: 'Сколько раз выполняется функция setup()?', options: ['Бесконечно', 'Один раз при запуске', 'Два раза', 'Ни разу'], correctOption: 1, checks: [] },
+  { id: 88, title: 'Тест: loop()', x: 87, y: 84, type: 'quiz', task: 'Как работает функция loop()?', options: ['Один раз', 'Бесконечно по кругу', 'Только при нажатии кнопки', 'Только ночью'], correctOption: 1, checks: [] },
+  { id: 89, title: 'Тест: pinMode', x: 88, y: 86, type: 'quiz', task: 'Что делает pinMode(13, OUTPUT)?', options: ['Читает кнопку', 'Настраивает пин 13 на выход', 'Включает светодиод', 'Выключает питание'], correctOption: 1, checks: [] },
+  { id: 90, title: 'Тест: digitalWrite', x: 89, y: 88, type: 'quiz', task: 'Что делает digitalWrite(13, HIGH)?', options: ['Выключает пин', 'Включает пин (подает 5В)', 'Читает пин', 'Ждет 1 секунду'], correctOption: 1, checks: [] },
+  { id: 91, title: 'Тест: analogRead', x: 90, y: 90, type: 'quiz', task: 'Какой диапазон значений возвращает analogRead()?', options: ['0 и 1', '0 до 255', '0 до 1023', '0 до 5'], correctOption: 2, checks: [] },
+  { id: 92, title: 'Тест: analogWrite', x: 91, y: 92, type: 'quiz', task: 'Какой диапазон у analogWrite() (ШИМ)?', options: ['0 до 1023', '0 до 255', '0 и 1', '0 до 100'], correctOption: 1, checks: [] },
+  { id: 93, title: 'Тест: millis()', x: 92, y: 94, type: 'quiz', task: 'Что возвращает millis()?', options: ['Секунды', 'Миллисекунды с момента запуска', 'Минуты', 'Часы'], correctOption: 1, checks: [] },
+  { id: 94, title: 'Тест: delay()', x: 93, y: 96, type: 'quiz', task: 'Что делает delay(1000)?', options: ['Ждет 1 секунду (1000 мс)', 'Ждет 1 минуту', 'Ускоряет код', 'Включает светодиод'], correctOption: 0, checks: [] },
+  { id: 95, title: 'Тест: Serial', x: 94, y: 98, type: 'quiz', task: 'Для чего нужен Serial.begin(9600)?', options: ['Для связи с ПК (монитор порта)', 'Для включения мотора', 'Для звука', 'Для сна'], correctOption: 0, checks: [] },
+  { id: 96, title: 'Тест: Типы данных', x: 95, y: 100, type: 'quiz', task: 'Какой тип используется для целых чисел?', options: ['float', 'char', 'int', 'bool'], correctOption: 2, checks: [] },
+  { id: 97, title: 'Тест: if/else', x: 96, y: 102, type: 'quiz', task: 'Что делает оператор else?', options: ['Проверяет условие', 'Выполняется, если условие в if ложно', 'Создает цикл', 'Останавливает программу'], correctOption: 1, checks: [] },
+  { id: 98, title: 'Тест: Массивы', x: 97, y: 104, type: 'quiz', task: 'С какого индекса начинаются массивы в C++?', options: ['1', '0', '-1', '10'], correctOption: 1, checks: [] },
+  { id: 99, title: 'Тест: Библиотеки', x: 98, y: 106, type: 'quiz', task: 'Как подключить библиотеку Servo?', options: ['import Servo', 'include <Servo.h>', '#include <Servo.h>', 'using Servo'], correctOption: 2, checks: [] },
+  { id: 100, title: 'Тест: Мастер', x: 99, y: 108, type: 'quiz', task: 'Ты дошел до конца! Какой тип данных хранит true/false?', options: ['int', 'float', 'bool', 'char'], correctOption: 2, checks: [] },
 ];

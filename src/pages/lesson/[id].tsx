@@ -28,6 +28,11 @@ const LessonPage = () => {
   const [isFalling, setIsFalling] = useState(false);
   const [showFinal, setShowFinal] = useState(false);
   const [finalData, setFinalData] = useState({ nickname: '', avatar: '', totalScore: 0 });
+  
+  // Для тестов
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [quizStatus, setQuizStatus] = useState<'idle' | 'correct' | 'wrong'>('idle');
+
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -37,6 +42,8 @@ const LessonPage = () => {
       setStatus('idle');
       setAttempts(0);
       setShowFinal(false);
+      setSelectedOption(null);
+      setQuizStatus('idle');
     }
   }, [levelId]);
 
@@ -65,12 +72,10 @@ const LessonPage = () => {
         if (prev <= 1) {
           const fallback = level.fallbackLevel || 1;
           setIsFalling(true);
-
           if (user) {
             saveProgress(user.id, { is_falling: true, level: fallback })
               .catch(e => console.error('saveProgress error:', e));
           }
-
           return 0;
         }
         return prev - 1;
@@ -150,20 +155,20 @@ const LessonPage = () => {
     setAttempts((prev) => prev + 1);
 
     if (levelId >= 16 && (!code.includes('void setup') || !code.includes('void loop'))) {
-      setOutput('⚠ ОШИБКА: В коде должны быть функции void setup() и void loop().\n\nЭто обязательные функции Arduino.');
+      setOutput('⚠ ОШИБКА: В коде должны быть функции void setup() и void loop().');
       setStatus('failed');
       return;
     }
 
     if (!code.trim()) {
-      setOutput('⚠ ОШИБКА: код не обнаружен.\nНапиши решение в редакторе и нажми «Запустить код».');
+      setOutput('⚠ ОШИБКА: код не обнаружен.');
       setStatus('failed');
       return;
     }
 
     const result = checkCode();
     if (!result.ok) {
-      setOutput('❌ ПРОВЕРКА НЕ ПРОЙДЕНА\n\n' + result.errors.join('\n') + '\n\nИсправь ошибки и попробуй снова.');
+      setOutput('❌ ПРОВЕРКА НЕ ПРОЙДЕНА\n\n' + result.errors.join('\n'));
       setStatus('failed');
       return;
     }
@@ -182,68 +187,74 @@ const LessonPage = () => {
     setStatus('passed');
   };
 
+  const handleQuizAnswer = async (index: number) => {
+    if (status === 'passed') return;
+    setSelectedOption(index);
+    
+    if (index === level.correctOption) {
+      setQuizStatus('correct');
+      setStatus('passed');
+      
+      if (user) {
+        try {
+          const existing = await getProgress(user.id);
+          const nextLevel = Math.min(levelId + 1, 100);
+          await saveProgress(user.id, {
+            level: Math.max(nextLevel, existing?.level || 1),
+            rest_until: null,
+            is_falling: false,
+          });
+          await addScore(user.id, 50);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    } else {
+      setQuizStatus('wrong');
+      setStatus('failed');
+    }
+  };
+
   const completeLevel = async () => {
     if (status !== 'passed') {
-      setOutput('⚠ Сначала запусти код и убедись, что он проходит проверку.');
+      setOutput('⚠ Сначала пройди проверку.');
       return;
     }
 
-    const nextLevel = Math.min(levelId + 1, LEVELS.length);
-
-    let savedProgress: any = null;
-
-    if (user) {
+    const nextLevel = Math.min(levelId + 1, 100);
+    
+    if (user && level.type !== 'quiz') {
       try {
         const existing = await getProgress(user.id);
-        const prevAttempts = existing?.attempts || {};
-        const newAttempts = {
-          ...prevAttempts,
-          [levelId]: (prevAttempts[levelId] || 0) + attempts,
-        };
-
-        const penalty = Math.max(0, (attempts - 1) * 10);
-        const points = Math.max(0, 100 - penalty);
-
         await saveProgress(user.id, {
           level: Math.max(nextLevel, existing?.level || 1),
-          attempts: newAttempts,
           rest_until: null,
           is_falling: false,
         });
-
-        await addScore(user.id, points);
-
-        savedProgress = await getProgress(user.id);
-      } catch (e) {
-        console.error('Ошибка сохранения прогресса:', e);
-      }
+        await addScore(user.id, 100);
+      } catch (e) { console.error(e); }
     }
 
     if (timerRef.current) clearInterval(timerRef.current);
 
-    if (levelId === 50) {
+    if (levelId === 100) {
+      const saved = await getProgress(user?.id || '');
       setFinalData({
-        nickname: savedProgress?.nickname || user?.email?.split('@')[0] || 'Игрок',
-        avatar: savedProgress?.avatar || '🧗',
-        totalScore: savedProgress?.total_score || 0,
+        nickname: saved?.nickname || 'Игрок',
+        avatar: saved?.avatar || '🧗',
+        totalScore: saved?.total_score || 0,
       });
       setShowFinal(true);
       return;
     }
-
-    // Переход на уровни + перезагрузка для свежих данных
     navigate('/levels');
-    window.location.reload();
   };
 
   return (
     <div className="lesson-container">
       <header className="lesson-header">
         <div>
-          <h1>
-            Уровень {id}: {level.title}
-            {level.type === 'fix' && ' ⚠ ОБРЫВ'}
-          </h1>
+          <h1>Уровень {id}: {level.title}</h1>
         </div>
 
         {timeLeft !== null && (
@@ -254,113 +265,80 @@ const LessonPage = () => {
 
         <div className="header-actions">
           {THEORY_DETAILED[levelId] && level.type !== 'fix' && (
-            <button className="theory-btn" onClick={() => setShowDetailedTheory(true)}>
-              📘 Теория
-            </button>
+            <button className="theory-btn" onClick={() => setShowDetailedTheory(true)}>📘 Теория</button>
           )}
           {THEORY[levelId] && level.type !== 'fix' && (
-            <button className="theory-btn" onClick={() => setShowTheory(true)}>
-              📝 Конспект
-            </button>
+            <button className="theory-btn" onClick={() => setShowTheory(true)}>📝 Конспект</button>
           )}
           <Link to="/levels" className="exit-btn">🚪 Выйти</Link>
         </div>
       </header>
 
-      {levelId >= 16 && (
-        <div className="arduino-hint">
-          💡 Каждый скетч Arduino состоит из двух обязательных функций: <code>void setup()</code> (выполняется один раз) и <code>void loop()</code> (выполняется бесконечно).
+      <div className="lesson-body">
+        {level.type === 'quiz' ? (
+          <div className="quiz-panel">
+            <h2 className="quiz-question">{level.task}</h2>
+            <div className="quiz-options">
+              {level.options?.map((opt, idx) => (
+                <button
+                  key={idx}
+                  className={`quiz-option ${selectedOption === idx ? 'selected' : ''} ${quizStatus === 'correct' && idx === level.correctOption ? 'correct' : ''} ${quizStatus === 'wrong' && selectedOption === idx ? 'wrong' : ''}`}
+                  onClick={() => handleQuizAnswer(idx)}
+                  disabled={quizStatus === 'correct'}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <div className="quiz-lights">
+              <div className={`light red ${quizStatus === 'wrong' ? 'active' : ''}`}></div>
+              <div className={`light green ${quizStatus === 'correct' ? 'active' : ''}`}></div>
+            </div>
+            {quizStatus === 'wrong' && <p className="quiz-msg error">Неверно! Попробуй еще раз.</p>}
+            {quizStatus === 'correct' && <p className="quiz-msg success">Верно! +50 баллов.</p>}
+          </div>
+        ) : (
+          <>
+            <div className="code-editor-panel">
+              <div className="panel-header">Редактор кода</div>
+              <textarea value={code} onChange={(e) => setCode(e.target.value)} className="code-area" spellCheck={false} />
+              <button onClick={runCode} className={`run-btn ${status === 'passed' ? 'success' : ''}`}>
+                {status === 'passed' ? '✅ Код верен' : 'Запустить код'}
+              </button>
+            </div>
+            <div className="task-panel">
+              <div className="panel-header">Задание</div>
+              <div className="task-content"><p style={{ whiteSpace: 'pre-wrap' }}>{level.task}</p></div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {level.type !== 'quiz' && (
+        <div className="serial-monitor">
+          <div className="panel-header">Serial Monitor</div>
+          <pre className={`monitor-output ${status}`}>{output}</pre>
         </div>
       )}
 
-      <div className="lesson-body">
-        <div className="code-editor-panel">
-          <div className="panel-header">
-            Редактор кода
-            {attempts > 0 && (
-              <span style={{ fontSize: 11, color: '#8b949e', fontWeight: 'normal' }}>
-                {' '}· попыток: {attempts}
-              </span>
-            )}
-          </div>
-          <textarea
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            className="code-area"
-            spellCheck={false}
-          />
-          <button
-            onClick={runCode}
-            className={`run-btn ${status === 'passed' ? 'success' : ''}`}
-          >
-            {status === 'passed' ? '✅ Код верен' : 'Запустить код'}
-          </button>
-        </div>
-
-        <div className="task-panel">
-          <div className="panel-header">Задание</div>
-          <div className="task-content">
-            <p style={{ whiteSpace: 'pre-wrap' }}>{level.task}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="serial-monitor">
-        <div className="panel-header">
-          Serial Monitor
-          {status === 'passed' && <span className="status-badge success">ПРОЙДЕНО</span>}
-          {status === 'failed' && <span className="status-badge failed">ОШИБКА</span>}
-        </div>
-        <pre className={`monitor-output ${status}`}>{output}</pre>
-      </div>
-
-      <button
-        onClick={completeLevel}
-        className="complete-btn"
-        disabled={status !== 'passed'}
-        style={{
-          opacity: status !== 'passed' ? 0.4 : 1,
-          cursor: status !== 'passed' ? 'not-allowed' : 'pointer',
-        }}
-      >
-        {status !== 'passed' ? 'Сначала запусти код' : 'Завершить уровень →'}
+      <button onClick={completeLevel} className="complete-btn" disabled={status !== 'passed'}>
+        {status !== 'passed' ? 'Сначала пройди уровень' : 'Завершить уровень →'}
       </button>
 
       {showDetailedTheory && THEORY_DETAILED[levelId] && (
-        <TheoryModal
-          title={THEORY_DETAILED[levelId].title}
-          content={THEORY_DETAILED[levelId].content}
-          mode="theory"
-          onClose={() => setShowDetailedTheory(false)}
-        />
+        <TheoryModal title={THEORY_DETAILED[levelId].title} content={THEORY_DETAILED[levelId].content} mode="theory" onClose={() => setShowDetailedTheory(false)} />
       )}
 
       {showTheory && THEORY[levelId] && (
-        <TheoryModal
-          title={THEORY[levelId].title}
-          content={THEORY[levelId].content}
-          mode="notes"
-          onClose={closeTheory}
-        />
+        <TheoryModal title={THEORY[levelId].title} content={THEORY[levelId].content} mode="notes" onClose={closeTheory} />
       )}
 
       {isFalling && (
-        <FallingScreen
-          onDone={() => {
-            setIsFalling(false);
-            navigate('/levels');
-            window.location.reload();
-          }}
-        />
+        <FallingScreen onDone={() => { setIsFalling(false); navigate('/levels'); }} />
       )}
 
       {showFinal && (
-        <FinalScreen
-          nickname={finalData.nickname}
-          avatar={finalData.avatar}
-          totalScore={finalData.totalScore}
-          totalLevels={50}
-        />
+        <FinalScreen {...finalData} totalLevels={100} />
       )}
     </div>
   );

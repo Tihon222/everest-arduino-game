@@ -81,7 +81,7 @@ const LevelsPage = () => {
       <header className="levels-header">
         <div className="levels-title-block">
           <h1>Уровни</h1>
-          <p className="levels-subtitle">Твой прогресс: {myLevel} / 50</p>
+          <p className="levels-subtitle">Твой прогресс: {myLevel} / 100</p>
         </div>
         <div className="levels-actions">
           <div className="levels-filters">
