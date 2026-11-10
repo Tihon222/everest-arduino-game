@@ -29,7 +29,6 @@ const LessonPage = () => {
   const [showFinal, setShowFinal] = useState(false);
   const [finalData, setFinalData] = useState({ nickname: '', avatar: '', totalScore: 0 });
   
-  // Для тестов
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [quizStatus, setQuizStatus] = useState<'idle' | 'correct' | 'wrong'>('idle');
 
@@ -51,9 +50,7 @@ const LessonPage = () => {
     if (!level || !THEORY[levelId]) return;
     if (level.type === 'fix') return;
     const seen = localStorage.getItem(`theory_seen_${levelId}`);
-    if (!seen) {
-      setShowTheory(true);
-    }
+    if (!seen) setShowTheory(true);
   }, [level, levelId]);
 
   const closeTheory = () => {
@@ -63,9 +60,7 @@ const LessonPage = () => {
 
   useEffect(() => {
     if (!level || level.type !== 'fix' || !level.timeLimit) return;
-
     setTimeLeft(level.timeLimit);
-
     timerRef.current = window.setInterval(() => {
       setTimeLeft((prev) => {
         if (prev === null) return prev;
@@ -81,10 +76,7 @@ const LessonPage = () => {
         return prev - 1;
       });
     }, 1000);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [level, navigate, user]);
 
   if (!level) {
@@ -99,9 +91,7 @@ const LessonPage = () => {
   const checkCode = (): { ok: boolean; errors: string[] } => {
     const errors: string[] = [];
     for (const rule of level.checks) {
-      if (!rule.pattern.test(code)) {
-        errors.push('✗ ' + rule.message);
-      }
+      if (!rule.pattern.test(code)) errors.push('✗ ' + rule.message);
     }
     return { ok: errors.length === 0, errors };
   };
@@ -109,7 +99,6 @@ const LessonPage = () => {
   const simulateOutput = () => {
     let log = '> Программа запущена...\n';
     let hasOutput = false;
-
     const textMatches = code.match(/Serial\.println\s*\(\s*["']([^"']+)["']\s*\)/g);
     if (textMatches) {
       textMatches.forEach(match => {
@@ -117,72 +106,53 @@ const LessonPage = () => {
         if (text) { log += `> ${text}\n`; hasOutput = true; }
       });
     }
-
     const varMatches = code.match(/Serial\.println\s*\(\s*(\w+)\s*\)/g);
     if (varMatches) {
       varMatches.forEach(match => {
         const varName = match.match(/\(\s*(\w+)\s*\)/)?.[1];
         if (varName && varName !== 'digitalRead' && varName !== 'analogRead') {
           const varValueMatch = code.match(new RegExp(`${varName}\\s*=\\s*(\\d+)`));
-          if (varValueMatch) {
-            log += `> ${varValueMatch[1]}\n`;
-          } else {
-            log += `> [значение ${varName}]\n`;
-          }
+          if (varValueMatch) log += `> ${varValueMatch[1]}\n`;
+          else log += `> [значение ${varName}]\n`;
           hasOutput = true;
         }
       });
     }
-
     if (code.includes('for') && (code.includes('Serial.println') || code.includes('Serial.print'))) {
-      log += '> 0\n> 1\n> 2\n> 3\n> 4\n';
-      hasOutput = true;
+      log += '> 0\n> 1\n> 2\n> 3\n> 4\n'; hasOutput = true;
     }
-
     if (code.includes('analogRead') && code.includes('Serial.println')) {
-      log += '> 512\n';
-      hasOutput = true;
+      log += '> 512\n'; hasOutput = true;
     }
-
-    if (!hasOutput) {
-      log += '> (Код выполнен, но ничего не выведено)\n';
-    }
-
+    if (!hasOutput) log += '> (Код выполнен, но ничего не выведено)\n';
     return log;
   };
 
   const runCode = () => {
     setAttempts((prev) => prev + 1);
-
     if (levelId >= 16 && (!code.includes('void setup') || !code.includes('void loop'))) {
       setOutput('⚠ ОШИБКА: В коде должны быть функции void setup() и void loop().');
       setStatus('failed');
       return;
     }
-
     if (!code.trim()) {
       setOutput('⚠ ОШИБКА: код не обнаружен.');
       setStatus('failed');
       return;
     }
-
     const result = checkCode();
     if (!result.ok) {
       setOutput('❌ ПРОВЕРКА НЕ ПРОЙДЕНА\n\n' + result.errors.join('\n'));
       setStatus('failed');
       return;
     }
-
     const lines = code.split('\n').length;
     const chars = code.length;
     const simLog = simulateOutput();
-
     setOutput(
       `✅ КОМПИЛЯЦИЯ УСПЕШНА\n` +
       `Строк: ${lines} | Символов: ${chars}\n\n` +
-      `Serial Monitor:\n` +
-      simLog +
-      `\nСтатус: ✅ ПРОЙДЕНО`
+      `Serial Monitor:\n` + simLog + `\nСтатус: ✅ ПРОЙДЕНО`
     );
     setStatus('passed');
   };
@@ -190,24 +160,16 @@ const LessonPage = () => {
   const handleQuizAnswer = async (index: number) => {
     if (status === 'passed') return;
     setSelectedOption(index);
-    
     if (index === level.correctOption) {
       setQuizStatus('correct');
       setStatus('passed');
-      
       if (user) {
         try {
           const existing = await getProgress(user.id);
           const nextLevel = Math.min(levelId + 1, 100);
-          await saveProgress(user.id, {
-            level: Math.max(nextLevel, existing?.level || 1),
-            rest_until: null,
-            is_falling: false,
-          });
+          await saveProgress(user.id, { level: Math.max(nextLevel, existing?.level || 1), rest_until: null, is_falling: false });
           await addScore(user.id, 50);
-        } catch (e) {
-          console.error(e);
-        }
+        } catch (e) { console.error(e); }
       }
     } else {
       setQuizStatus('wrong');
@@ -220,23 +182,16 @@ const LessonPage = () => {
       setOutput('⚠ Сначала пройди проверку.');
       return;
     }
-
     const nextLevel = Math.min(levelId + 1, 100);
-    
     if (user && level.type !== 'quiz') {
       try {
         const existing = await getProgress(user.id);
-        await saveProgress(user.id, {
-          level: Math.max(nextLevel, existing?.level || 1),
-          rest_until: null,
-          is_falling: false,
-        });
+        await saveProgress(user.id, { level: Math.max(nextLevel, existing?.level || 1), rest_until: null, is_falling: false });
         await addScore(user.id, 100);
       } catch (e) { console.error(e); }
     }
-
     if (timerRef.current) clearInterval(timerRef.current);
-
+    
     if (levelId === 100) {
       const saved = await getProgress(user?.id || '');
       setFinalData({
@@ -247,7 +202,10 @@ const LessonPage = () => {
       setShowFinal(true);
       return;
     }
+    
+    // ⬇️ ГЛАВНОЕ ИСПРАВЛЕНИЕ: переход + перезагрузка страницы
     navigate('/levels');
+    window.location.reload(); 
   };
 
   return (
@@ -256,13 +214,9 @@ const LessonPage = () => {
         <div>
           <h1>Уровень {id}: {level.title}</h1>
         </div>
-
         {timeLeft !== null && (
-          <div className={`timer ${timeLeft < 15 ? 'danger' : ''}`}>
-            ⏱ {timeLeft} сек
-          </div>
+          <div className={`timer ${timeLeft < 15 ? 'danger' : ''}`}>⏱ {timeLeft} сек</div>
         )}
-
         <div className="header-actions">
           {THEORY_DETAILED[levelId] && level.type !== 'fix' && (
             <button className="theory-btn" onClick={() => setShowDetailedTheory(true)}>📘 Теория</button>
@@ -328,15 +282,12 @@ const LessonPage = () => {
       {showDetailedTheory && THEORY_DETAILED[levelId] && (
         <TheoryModal title={THEORY_DETAILED[levelId].title} content={THEORY_DETAILED[levelId].content} mode="theory" onClose={() => setShowDetailedTheory(false)} />
       )}
-
       {showTheory && THEORY[levelId] && (
         <TheoryModal title={THEORY[levelId].title} content={THEORY[levelId].content} mode="notes" onClose={closeTheory} />
       )}
-
       {isFalling && (
-        <FallingScreen onDone={() => { setIsFalling(false); navigate('/levels'); }} />
+        <FallingScreen onDone={() => { setIsFalling(false); navigate('/levels'); window.location.reload(); }} />
       )}
-
       {showFinal && (
         <FinalScreen {...finalData} totalLevels={100} />
       )}
